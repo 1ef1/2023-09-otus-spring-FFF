@@ -6,6 +6,16 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
+    <bean id="AppConfig" class="ru.otus.hw.config.AppConfig">
+        <constructor-arg index="0" value="questions.csv"/>
+    </bean>
+
+
+    <bean id="CsvQuestionDao" class="ru.otus.hw.dao.CsvQuestionDao">
+        <constructor-arg ref="AppConfig"/>
+    </bean>
+
+
     <bean id="ioService" class="ru.otus.hw.service.StreamsIOService">
         <constructor-arg index="0">
             <util:constant static-field="java.lang.System.out"/>
@@ -13,7 +23,8 @@
     </bean>
 
     <bean id="TestServiceImpl" class="ru.otus.hw.service.TestServiceImpl">
-        <constructor-arg ref="ioService"/>
+        <constructor-arg index="0" ref="ioService"/>
+        <constructor-arg index="1" ref="CsvQuestionDao"/>
     </bean>
 
     <bean id="TestRunnerServiceImpl" class="ru.otus.hw.service.TestRunnerServiceImpl">

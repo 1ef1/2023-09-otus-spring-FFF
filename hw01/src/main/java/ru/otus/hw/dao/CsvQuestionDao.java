@@ -10,9 +10,11 @@ import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -29,7 +31,8 @@ public class CsvQuestionDao implements QuestionDao {
 
         List<QuestionDto> questions;
         AppConfig appConfig = new AppConfig("questions.csv");
-        try (Reader fileReader = new InputStreamReader(classLoader.getResourceAsStream(appConfig.getTestFileName()))) {
+        InputStream inStream = Objects.requireNonNull(classLoader.getResourceAsStream(appConfig.getTestFileName()));
+        try (Reader fileReader = new InputStreamReader(inStream)) {
 
             questions = new CsvToBeanBuilder<QuestionDto>(fileReader)
                     .withType(QuestionDto.class)
@@ -41,8 +44,6 @@ public class CsvQuestionDao implements QuestionDao {
         } catch (IOException e) {
             throw new QuestionReadException("CsvQuestionDao Exception", e);
         }
-
-
         return questions.stream().map(QuestionDto::toDomainObject).collect(Collectors.toList());
     }
 }
