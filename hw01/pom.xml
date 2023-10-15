@@ -73,6 +73,12 @@
             <optional>true</optional>
             <version>${lombok.version}</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
