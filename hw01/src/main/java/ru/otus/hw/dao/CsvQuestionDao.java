@@ -3,7 +3,6 @@ package ru.otus.hw.dao;
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
 import ru.otus.hw.Application;
-import ru.otus.hw.config.AppConfig;
 import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
@@ -30,9 +29,9 @@ public class CsvQuestionDao implements QuestionDao {
         ClassLoader classLoader = Application.class.getClassLoader();
 
         List<QuestionDto> questions;
-        AppConfig appConfig = new AppConfig("questions.csv");
-        InputStream inStream = Objects.requireNonNull(classLoader.getResourceAsStream(appConfig.getTestFileName()));
-        try (Reader fileReader = new InputStreamReader(inStream)) {
+        InputStream iS = Objects.requireNonNull(classLoader
+                .getResourceAsStream(this.fileNameProvider .getTestFileName()));
+        try (Reader fileReader = new InputStreamReader(iS)) {
 
             questions = new CsvToBeanBuilder<QuestionDto>(fileReader)
                     .withType(QuestionDto.class)
@@ -40,10 +39,10 @@ public class CsvQuestionDao implements QuestionDao {
                     .withSeparator(';')
                     .build()
                     .parse();
+            return questions.stream().map(QuestionDto::toDomainObject).collect(Collectors.toList());
 
         } catch (IOException e) {
             throw new QuestionReadException("CsvQuestionDao Exception", e);
         }
-        return questions.stream().map(QuestionDto::toDomainObject).collect(Collectors.toList());
     }
 }
