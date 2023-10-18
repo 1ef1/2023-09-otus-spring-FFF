@@ -1,8 +1,10 @@
 package ru.otus.hw.service;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
@@ -13,6 +15,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class TestServiceImplTest {
 
     @Mock
@@ -21,25 +24,21 @@ public class TestServiceImplTest {
     @Mock
     private QuestionDao questionDao;
 
+    @InjectMocks
     private TestServiceImpl testService;
 
     @Test
     public void executeTest_shouldPrintQuestionsAndAnswers() {
         // Arrange
-
-        ioService = mock(IOService.class);
-        questionDao = mock(QuestionDao.class);
-        testService = new TestServiceImpl(ioService, questionDao);
-
         String textQuestion = "Question1";
-        Answer answer1 = new Answer("Answer1",true);
-        Answer answer2 = new Answer("Answer2",false);
-        Answer answer3 = new Answer("Answer3",false);
-        List<Answer> answerList= new ArrayList<>();
+        Answer answer1 = new Answer("Answer1", true);
+        Answer answer2 = new Answer("Answer2", false);
+        Answer answer3 = new Answer("Answer3", false);
+        List<Answer> answerList = new ArrayList<>();
         answerList.add(answer1);
         answerList.add(answer2);
         answerList.add(answer3);
-        Question question = new Question(textQuestion,answerList);
+        Question question = new Question(textQuestion, answerList);
 
 
         when(questionDao.findAll()).thenReturn(Collections.singletonList(question));
