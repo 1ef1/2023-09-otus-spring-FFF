@@ -22,13 +22,13 @@
         </constructor-arg>
     </bean>
 
-    <bean id="testServiceImpl" class="ru.otus.hw.service.TestServiceImpl">
+    <bean id="testService" class="ru.otus.hw.service.TestServiceImpl">
         <constructor-arg index="0" ref="ioService"/>
         <constructor-arg index="1" ref="csvQuestionDao"/>
     </bean>
 
-    <bean id="TestRunnerServiceImpl" class="ru.otus.hw.service.TestRunnerServiceImpl">
-        <constructor-arg ref="testServiceImpl"/>
+    <bean id="TestRunnerService" class="ru.otus.hw.service.TestRunnerServiceImpl">
+        <constructor-arg ref="testService"/>
     </bean>
 
 </beans>
