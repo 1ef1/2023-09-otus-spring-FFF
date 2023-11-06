@@ -8,7 +8,7 @@
 
     <bean id="appConfig" class="ru.otus.hw02.config.AppConfig">
         <property name="rightAnswersCountToPass" value="3" />
-        <property name="testFileName" value="${fileName}" />
+        <property name="testFileName" value="questions.csv" />
     </bean>
 
 
