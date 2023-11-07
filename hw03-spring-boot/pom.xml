@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>ru.otus.hw</groupId>
+    <groupId>ru.otus.hw03</groupId>
     <artifactId>hw03-spring-boot</artifactId>
     <version>1.0</version>
 
