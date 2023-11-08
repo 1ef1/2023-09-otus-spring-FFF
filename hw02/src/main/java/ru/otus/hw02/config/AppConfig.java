@@ -3,7 +3,6 @@ package ru.otus.hw02.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -25,41 +24,30 @@ public class AppConfig implements TestConfig, TestFileNameProvider {
     @Value("${testFileName}")
     private String testFileName;
 
-    @Bean
     public CsvQuestionDao csvQuestionDao() {
-        return new CsvQuestionDao(appConfig());
+        TestFileNameProvider fileNameProvider = () -> testFileName;
+        return new CsvQuestionDao(fileNameProvider);
     }
 
-    @Bean
     public StreamsIOService ioService() {
         return new StreamsIOService(System.out, System.in);
     }
 
-    @Bean
     public TestServiceImpl testServiceImpl() {
         return new TestServiceImpl(ioService(), csvQuestionDao());
     }
 
-    @Bean
     public StudentServiceImpl studentService() {
         return new StudentServiceImpl(ioService());
     }
 
-    @Bean
     public ResultServiceImpl resultService() {
-        return new ResultServiceImpl(appConfig(), ioService());
+
+        TestConfig testConfig = () -> rightAnswersCountToPass;
+        return new ResultServiceImpl(testConfig, ioService());
     }
 
-    @Bean
     public TestRunnerServiceImpl testRunnerServiceImpl() {
         return new TestRunnerServiceImpl(testServiceImpl(), studentService(), resultService());
-    }
-
-    @Bean(name = "myAppConfig")
-    public AppConfig appConfig() {
-        AppConfig config = new AppConfig();
-        config.setRightAnswersCountToPass(rightAnswersCountToPass);
-        config.setTestFileName(testFileName);
-        return config;
     }
 }
