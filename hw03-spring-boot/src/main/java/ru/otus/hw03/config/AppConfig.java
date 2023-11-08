@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -31,9 +32,10 @@ import java.util.Map;
 // Использовать @ConfigurationProperties.
 // Сейчас класс соответствует файлу настроек. Чтобы они сюда отобразились нужно только правильно разместить аннотации
 public class AppConfig implements TestConfig, TestFileNameProvider, LocaleConfig {
-
+    @Value("${rightAnswersCountToPass}")
     private int rightAnswersCountToPass;
 
+    @Value("${testFileName}")
     private String testFileName;
 
     @Getter
@@ -47,16 +49,11 @@ public class AppConfig implements TestConfig, TestFileNameProvider, LocaleConfig
 
 
 
-    @Bean
     public CsvQuestionDao csvQuestionDao() {
-        return new CsvQuestionDao(appConfig());
+        TestFileNameProvider fileNameProvider = () -> testFileName;
+        return new CsvQuestionDao(fileNameProvider);
     }
 
-//    @Bean
-//    public StreamsIOService ioService() {
-//        return new StreamsIOService(System.out, System.in);
-//    }
-    @Bean
     public StreamsIOService ioService() {
         return new StreamsIOService(System.out, System.in);
     }
@@ -66,37 +63,25 @@ public class AppConfig implements TestConfig, TestFileNameProvider, LocaleConfig
         return new LocalizedMessagesServiceImpl(() -> new Locale("en-US"));
     }
 
-    @Bean
     public LocalizedIOService localizedIOService() {
         return new LocalizedIOServiceImpl(localizedMessagesService(), ioService());
     }
 
-    @Bean
+
     public TestServiceImpl testServiceImpl() {
         return new TestServiceImpl(localizedIOService(), csvQuestionDao());
     }
 
-    @Bean
     public StudentServiceImpl studentService() {
         return new StudentServiceImpl(localizedIOService());
     }
 
-    @Bean
     public ResultServiceImpl resultService() {
-        return new ResultServiceImpl(appConfig(), localizedIOService());
+        TestConfig testConfig = () -> rightAnswersCountToPass;
+        return new ResultServiceImpl(testConfig, localizedIOService());
     }
 
-    @Bean
     public TestRunnerServiceImpl testRunnerServiceImpl() {
         return new TestRunnerServiceImpl(testServiceImpl(), studentService(), resultService());
-    }
-
-    @Bean(name = "myAppConfig")
-    public AppConfig appConfig() {
-        AppConfig config = new AppConfig();
-        config.setRightAnswersCountToPass(rightAnswersCountToPass);
-        config.setTestFileName(testFileName);
-        config.setLocale(String.valueOf(locale));
-        return config;
     }
 }

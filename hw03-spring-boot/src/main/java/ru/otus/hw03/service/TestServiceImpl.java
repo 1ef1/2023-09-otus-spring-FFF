@@ -1,9 +1,11 @@
 package ru.otus.hw03.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import ru.otus.hw03.domain.Answer;
 import ru.otus.hw03.dao.QuestionDao;
+import ru.otus.hw03.domain.Question;
 import ru.otus.hw03.domain.Student;
 import ru.otus.hw03.domain.TestResult;
 
@@ -22,23 +24,29 @@ public class TestServiceImpl implements TestService {
 //        ioService.printLine("");
         var questions = questionDao.findAll();
         var testResult = new TestResult(student);
-        for (var question: questions) {
+
+        for (var question : questions) {
             var isAnswerValid = false; // Задать вопрос, получить ответ
-            ioService.printLine(question.text());
-            int answerValidNum = 0;
-            int countAnswer = 0;
-            for (Answer answer : question.answers()) {
-                ioService.printLine(++countAnswer + ": " + answer.text());
-                if (answer.isCorrect()) {
-                    answerValidNum = countAnswer;
-                }
-            }
-            String yourAnswer = ioService.readStringWithPrompt("your answer");
-            if (Integer.parseInt(yourAnswer) == answerValidNum) {
-                isAnswerValid = true;
-            }
+            isAnswerValid = isAnswerValid(question, isAnswerValid);
             testResult.applyAnswer(question, isAnswerValid);
         }
         return testResult;
+    }
+
+    private boolean isAnswerValid(@NotNull Question question, boolean isAnswerValid) {
+        ioService.printLine(question.text());
+        int answerValidNum = 0;
+        int countAnswer = 0;
+        for (Answer answer : question.answers()) {
+            ioService.printLine(++countAnswer + ": " + answer.text());
+            if (answer.isCorrect()) {
+                answerValidNum = countAnswer;
+            }
+        }
+        String sudentAnswer = ioService.readStringWithPrompt("your answer");
+        if (Integer.parseInt(sudentAnswer) == answerValidNum) {
+            isAnswerValid = true;
+        }
+        return isAnswerValid;
     }
 }
