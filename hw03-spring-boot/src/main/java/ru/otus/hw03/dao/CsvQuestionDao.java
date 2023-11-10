@@ -31,7 +31,8 @@ public class CsvQuestionDao implements QuestionDao {
 
         List<QuestionDto> questions;
         InputStream iS = Objects.requireNonNull(classLoader
-                .getResourceAsStream(this.fileNameProvider.getTestFileName()));
+//                .getResourceAsStream(this.fileNameProvider.getTestFileName()));
+                .getResourceAsStream("questions_ru.csv")); //todo вот так работает
         try (Reader fileReader = new InputStreamReader(iS)) {
 
             questions = new CsvToBeanBuilder<QuestionDto>(fileReader)

@@ -1,15 +1,16 @@
 package ru.otus.hw03.config;
 
 //import lombok.Getter;
-import lombok.Getter;
-import lombok.Setter;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import ru.otus.hw03.dao.CsvQuestionDao;
 import ru.otus.hw03.service.ResultServiceImpl;
 import ru.otus.hw03.service.StreamsIOService;
@@ -32,10 +33,10 @@ import java.util.Map;
 // Использовать @ConfigurationProperties.
 // Сейчас класс соответствует файлу настроек. Чтобы они сюда отобразились нужно только правильно разместить аннотации
 public class AppConfig implements TestConfig, TestFileNameProvider, LocaleConfig {
-    @Value("${rightAnswersCountToPass}")
+    //    @Value("${rightAnswersCountToPass}")
     private int rightAnswersCountToPass;
 
-    @Value("${testFileName}")
+    //    @Value("${testFileName}")
     private String testFileName;
 
     @Getter
@@ -43,14 +44,29 @@ public class AppConfig implements TestConfig, TestFileNameProvider, LocaleConfig
 
     private Map<String, String> fileNameByLocaleTag;
 
+    @Bean
+    public MessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("messages"); // имя базового имени ресурсного пакета без расширения файла
+        messageSource.setDefaultEncoding("ISO-8859-1"); // кодировка файлов ресурсов
+
+        return messageSource;
+    }
+
     public void setLocale(String locale) {
         this.locale = Locale.forLanguageTag(locale);
     }
 
 
-
     public CsvQuestionDao csvQuestionDao() {
-        TestFileNameProvider fileNameProvider = () -> testFileName;
+//        String testFileName111;
+//        if (locale.getDisplayLanguage().equals("en-US")) {
+//            testFileName111 = "questions.csv";
+//        } else {
+//            testFileName111 = "questions_ru.csv";
+//        }
+//        this.testFileName = testFileName111;
+        TestFileNameProvider fileNameProvider = () -> fileNameByLocaleTag.get("questions.csv");
         return new CsvQuestionDao(fileNameProvider);
     }
 
@@ -60,7 +76,7 @@ public class AppConfig implements TestConfig, TestFileNameProvider, LocaleConfig
 
     @Bean
     public LocalizedMessagesService localizedMessagesService() {
-        return new LocalizedMessagesServiceImpl(() -> new Locale("en-US"));
+        return new LocalizedMessagesServiceImpl(() -> new Locale("en-US"), messageSource());
     }
 
     public LocalizedIOService localizedIOService() {
