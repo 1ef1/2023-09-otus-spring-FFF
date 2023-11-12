@@ -26,13 +26,14 @@ public class TestServiceImpl implements TestService {
 
         for (var question : questions) {
             var isAnswerValid = false; // Задать вопрос, получить ответ
-            isAnswerValid = isAnswerValid(question, isAnswerValid);
+            isAnswerValid = asksAQuestionAndGetsAnAnswer(question);
             testResult.applyAnswer(question, isAnswerValid);
         }
         return testResult;
     }
 
-    private boolean isAnswerValid(@NotNull Question question, boolean isAnswerValid) {
+    private boolean asksAQuestionAndGetsAnAnswer(@NotNull Question question) {
+        var result = false;
         ioService.printLine(question.text());
         int answerValidNum = 0;
         int countAnswer = 0;
@@ -44,8 +45,8 @@ public class TestServiceImpl implements TestService {
         }
         String sudentAnswer = ioService.readStringWithPrompt("your answer");
         if (Integer.parseInt(sudentAnswer) == answerValidNum) {
-            isAnswerValid = true;
+            result = true;
         }
-        return isAnswerValid;
+        return result;
     }
 }
