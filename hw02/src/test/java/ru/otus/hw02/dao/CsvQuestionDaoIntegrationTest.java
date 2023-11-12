@@ -1,6 +1,10 @@
 package ru.otus.hw02.dao;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.hw02.config.TestFileNameProvider;
 import ru.otus.hw02.domain.Question;
 
@@ -9,13 +13,16 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@ExtendWith(MockitoExtension.class)
 class CsvQuestionDaoIntegrationTest {
-    private static final int EXPECTED_QUESTION_COUNT = 6;
 
+    @Mock
+    private TestFileNameProvider testFileNameProvider;
+
+    private static final int EXPECTED_QUESTION_COUNT = 6;
     @Test
     void shouldFindAllQuestions() {
-        TestFileNameProvider testFileNameProvider = () -> "questions.csv";
-
+        Mockito.when(testFileNameProvider.getTestFileName()).thenReturn("questions.csv");
         CsvQuestionDao csvQuestionDao = new CsvQuestionDao(testFileNameProvider);
         List<Question> questions = csvQuestionDao.findAll();
         assertNotNull(questions);

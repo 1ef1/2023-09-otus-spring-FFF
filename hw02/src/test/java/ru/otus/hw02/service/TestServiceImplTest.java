@@ -15,20 +15,25 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class TestServiceImplTest {
 
+
     @Mock
-    private Student student;
+    private TestFileNameProvider testFileNameProvider;
+
+
+    @Mock
+    private CsvQuestionDao csvQuestionDao;
 
     @Mock
     private IOService ioService;
 
     @Mock
-    private CsvQuestionDao csvQuestionDao;
+    private Student student;
 
     @Test
     void executeTestFor() {
-        TestFileNameProvider testFileNameProvider = () -> "questions.csv";
+        when(testFileNameProvider.getTestFileName()).thenReturn("questions.csv");
         csvQuestionDao = new CsvQuestionDao(testFileNameProvider);
-        when(ioService.readStringWithPrompt("your answer")).thenReturn("1");
+        when(ioService.readIntForRangeWithPrompt(1, 3, "your answer", "error input number question")).thenReturn(1);
         TestServiceImpl testService = new TestServiceImpl(ioService, csvQuestionDao);
         TestResult testResult = testService.executeTestFor(student);
         Assertions.assertEquals(3, testResult.getRightAnswersCount());

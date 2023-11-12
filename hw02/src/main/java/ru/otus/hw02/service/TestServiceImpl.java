@@ -33,7 +33,6 @@ public class TestServiceImpl implements TestService {
     }
 
     private boolean asksAQuestionAndGetsAnAnswer(@NotNull Question question) {
-        var result = false;
         ioService.printLine(question.text());
         int answerValidNum = 0;
         int countAnswer = 0;
@@ -43,10 +42,8 @@ public class TestServiceImpl implements TestService {
                 answerValidNum = countAnswer;
             }
         }
-        String sudentAnswer = ioService.readStringWithPrompt("your answer");
-        if (Integer.parseInt(sudentAnswer) == answerValidNum) {
-            result = true;
-        }
-        return result;
+        int sudentAnswerNum =
+                ioService.readIntForRangeWithPrompt(1, countAnswer,"your answer","error input number question");
+        return answerValidNum == sudentAnswerNum;
     }
 }
