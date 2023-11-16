@@ -25,8 +25,7 @@ public class TestServiceImpl implements TestService {
         var testResult = new TestResult(student);
 
         for (var question : questions) {
-            var isAnswerValid = false; // Задать вопрос, получить ответ
-            isAnswerValid = asksAQuestionAndGetsAnAnswer(question);
+            var isAnswerValid = asksAQuestionAndGetsAnAnswer(question);
             testResult.applyAnswer(question, isAnswerValid);
         }
         return testResult;
