@@ -19,21 +19,20 @@ public class TestServiceImpl implements TestService {
 
     @Override
     public TestResult executeTestFor(Student student) {
-//        ioService.printLine("");
-//        ioService.printLineLocalized("TestService.answer.the.questions");
-//        ioService.printLine("");
+        ioService.printLine("");
+        ioService.printLineLocalized("TestService.answer.the.questions");
+        ioService.printLine("");
         var questions = questionDao.findAll();
         var testResult = new TestResult(student);
 
         for (var question : questions) {
-            var isAnswerValid = false; // Задать вопрос, получить ответ
-            isAnswerValid = isAnswerValid(question, isAnswerValid);
+            var isAnswerValid = asksAQuestionAndGetsAnAnswer(question);
             testResult.applyAnswer(question, isAnswerValid);
         }
         return testResult;
     }
 
-    private boolean isAnswerValid(@NotNull Question question, boolean isAnswerValid) {
+    private boolean asksAQuestionAndGetsAnAnswer(@NotNull Question question) {
         ioService.printLine(question.text());
         int answerValidNum = 0;
         int countAnswer = 0;
@@ -43,10 +42,8 @@ public class TestServiceImpl implements TestService {
                 answerValidNum = countAnswer;
             }
         }
-        String sudentAnswer = ioService.readStringWithPrompt("your answer");
-        if (Integer.parseInt(sudentAnswer) == answerValidNum) {
-            isAnswerValid = true;
-        }
-        return isAnswerValid;
+        int sudentAnswerNum =
+                ioService.readIntForRangeWithPrompt(1, countAnswer,"your answer","error input number question");
+        return answerValidNum == sudentAnswerNum;
     }
 }
