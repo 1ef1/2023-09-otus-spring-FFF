@@ -11,8 +11,6 @@ public class LocalizedMessagesServiceImpl implements LocalizedMessagesService {
 
     private final LocaleConfig localeConfig;
 
-    // todo Доделать
-
     private final MessageSource messageSource;
 
     @Override

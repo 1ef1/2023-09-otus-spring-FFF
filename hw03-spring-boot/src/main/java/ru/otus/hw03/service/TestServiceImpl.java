@@ -43,7 +43,8 @@ public class TestServiceImpl implements TestService {
             }
         }
         int sudentAnswerNum =
-                ioService.readIntForRangeWithPrompt(1, countAnswer,"your answer","error input number question");
+                ioService.readIntForRangeWithPromptLocalized(1, countAnswer,"TestService.answer.the.answer"
+                        ,"TestService.answer.the.error");
         return answerValidNum == sudentAnswerNum;
     }
 }
