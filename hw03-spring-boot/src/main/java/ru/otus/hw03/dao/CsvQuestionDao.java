@@ -29,12 +29,11 @@ public class CsvQuestionDao implements QuestionDao {
 
         ClassLoader classLoader = CsvQuestionDao.class.getClassLoader();
 
-        List<QuestionDto> questions;
+
         InputStream iS = Objects.requireNonNull(classLoader
                 .getResourceAsStream(this.fileNameProvider.getTestFileName()));
         try (Reader fileReader = new InputStreamReader(iS)) {
-
-            questions = new CsvToBeanBuilder<QuestionDto>(fileReader)
+            List<QuestionDto> questions = new CsvToBeanBuilder<QuestionDto>(fileReader)
                     .withType(QuestionDto.class)
                     .withSkipLines(1)
                     .withSeparator(';')
