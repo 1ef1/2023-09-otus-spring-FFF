@@ -36,7 +36,7 @@ public class TestServiceImplTest {
         answerList.add(answer2);
         answerList.add(answer3);
         Question question = new Question(textQuestion, answerList);
-        List<Question> questionList = new ArrayList();
+        List<Question> questionList = new ArrayList<>();
         questionList.add(question);
         when(csvQuestionDao.findAll()).thenReturn(questionList);
         TestServiceImpl testService = new TestServiceImpl(ioService, csvQuestionDao);
