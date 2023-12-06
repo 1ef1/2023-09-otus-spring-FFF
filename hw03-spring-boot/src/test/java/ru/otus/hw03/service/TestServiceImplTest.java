@@ -26,7 +26,8 @@ public class TestServiceImplTest {
 
     @Test
     void executeTestFor() {
-        when(ioService.readIntForRangeWithPromptLocalized(1, 3, "TestService.answer.the.answer", "TestService.answer.the.error")).thenReturn(2);
+        when(ioService.readIntForRangeWithPromptLocalized(1, 3, "TestService.answer.the.answer",
+                "TestService.answer.the.error")).thenReturn(2);
         String textQuestion = "Question1";
         Answer answer1 = new Answer("Answer1", false);
         Answer answer2 = new Answer("Answer2", true);
