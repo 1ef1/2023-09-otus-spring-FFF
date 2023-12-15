@@ -31,7 +31,7 @@ public class JdbcGenreRepository implements GenreRepository {
 
     @Override
     public List<Genre> findAllByIds(Set<Long> ids) {
-        String sql = "select id, name from genre where id in (:ids)";
+        String sql = "select id, name from genres where id in (:ids)";
 
         Map<String, Object> namedParameters = Collections.singletonMap("ids", ids);
 
