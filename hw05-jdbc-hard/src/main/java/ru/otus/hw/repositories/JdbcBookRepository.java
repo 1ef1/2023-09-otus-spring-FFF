@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -19,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -123,23 +125,38 @@ public class JdbcBookRepository implements BookRepository {
 
     private Book update(Book book) {
         //...
-//todo
-        // Выбросить EntityNotFoundException если не обновлено ни одной записи в БД
+        // Выбросить EntityNotFoundException если не обновлено ни одной записи в БД // Вопрос если меняется жанр ??
 
-        removeGenresRelationsFor(book);
-        updateBook(book);
+//        boolean noGenreUpdate = false;
 
+        Optional<Book> book1 = this.findById(book.getId());
+        if (book1.isPresent()) {
+            if (!book1.get().getGenres().equals(book.getGenres())) {
+//                noGenreUpdate = true;
+                removeGenresRelationsFor(book);
+                insertGenres(book, book.getId());
+            }
+        } else {
+            insertGenres(book, book.getId());
+        }
+        int[] updateCounts = updateBook(book);
+
+        boolean noRowsAffected = Arrays.stream(updateCounts).allMatch(count -> count == 0);
+
+        if (noRowsAffected) { // || noGenreUpdate) {
+            throw new EntityNotFoundException("no updated rows");
+        }
         return book;
     }
 
-    private long updateBook(Book book) {
+    private int[] updateBook(Book book) {
         String updateAutorInBook = "update books set title=?, author_id=? where id=?";
 
-        jdbc.batchUpdate(updateAutorInBook,
+        int[] rez = jdbc.batchUpdate(updateAutorInBook,
                 new BatchPreparedStatementSetter() {
 
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setString(1,book.getTitle());
+                        ps.setString(1, book.getTitle());
                         ps.setLong(2, book.getAuthor().getId());
                         ps.setLong(3, book.getId());
                     }
@@ -151,9 +168,7 @@ public class JdbcBookRepository implements BookRepository {
                 });
 
 
-        insertGenres(book, book.getId());
-
-        return book.getId();
+        return rez;
     }
 
     private long batchInsertGenresRelationsFor(Book book) {
@@ -192,9 +207,9 @@ public class JdbcBookRepository implements BookRepository {
 
     private void insetBooksGenres(long bookId, List<Genre> genreList) {
         List<Object[]> booksGenresParams = new ArrayList<>();
-        for (long idGanre: genreList.stream().map(g -> g.getId()).toList()) {
-                Object[] params = new Object[]{bookId, idGanre};
-                booksGenresParams.add(params);
+        for (long idGanre : genreList.stream().map(g -> g.getId()).toList()) {
+            Object[] params = new Object[]{bookId, idGanre};
+            booksGenresParams.add(params);
         }
         jdbc.batchUpdate("insert into books_genres (book_id, genre_id) values (?, ?)", booksGenresParams);
     }
