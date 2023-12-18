@@ -2,6 +2,7 @@ package ru.otus.hw.repositories;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -66,11 +67,11 @@ public class JdbcBookRepository implements BookRepository {
     @Override
     public void deleteById(long id) {
         //...
-        String sql = "delete from books where id = :id";
+        String sql = "delete from books where books.id = :bookId";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("id", id);
-        jdbc.update(sql, parameters);
+        parameters.addValue("bookId", id);
+        namedParameterJdbcOperations.update(sql, parameters);
     }
 
     private List<Book> getAllBooksWithoutGenres() {
@@ -88,22 +89,17 @@ public class JdbcBookRepository implements BookRepository {
 
     private void mergeBooksInfo(List<Book> booksWithoutGenres, List<Genre> genres,
                                 List<BookGenreRelation> relations) {
-        // Добавить книгам (booksWithoutGenres) жанры (genres) в соответствии со связями (relations)
-        // Для каждой связи ищем соответствующий жанр и добавляем его в мапу
         Map<Long, List<Genre>> bookIdToGenresMap = new HashMap<>();
 
-        // Построение мапы ID книги к списку жанров
         for (BookGenreRelation relation : relations) {
             long bookId = relation.bookId();
             long genreId = relation.genreId();
             Genre genre = genreRepository.findAllByIds(Set.of(genreId)).stream().findFirst().orElse(null);
             if (genre != null) {
-                // Создаем список, если это первый жанр для книги
                 bookIdToGenresMap.computeIfAbsent(bookId, k -> new ArrayList<>()).add(genre);
             }
         }
 
-        // Добавление жанров к каждой книге
         for (Book book : booksWithoutGenres) {
             long bookId = book.getId();
             List<Genre> bookGenres = bookIdToGenresMap.getOrDefault(bookId, new ArrayList<>());
@@ -120,21 +116,47 @@ public class JdbcBookRepository implements BookRepository {
         if (keyHolder.getKey() != null) {
             book.setId(keyHolder.getKeyAs(Long.class));
         }
-        batchInsertGenresRelationsFor(book);
+        long newIdBook = batchInsertGenresRelationsFor(book);
+        book.setId(newIdBook);
         return book;
     }
 
     private Book update(Book book) {
         //...
-
+//todo
         // Выбросить EntityNotFoundException если не обновлено ни одной записи в БД
+
         removeGenresRelationsFor(book);
-        batchInsertGenresRelationsFor(book);
+        updateBook(book);
 
         return book;
     }
 
-    private void batchInsertGenresRelationsFor(Book book) {
+    private long updateBook(Book book) {
+        String updateAutorInBook = "update books set title=?, author_id=? where id=?";
+
+        jdbc.batchUpdate(updateAutorInBook,
+                new BatchPreparedStatementSetter() {
+
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setString(1,book.getTitle());
+                        ps.setLong(2, book.getAuthor().getId());
+                        ps.setLong(3, book.getId());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return 1;
+                    }
+                });
+
+
+        insertGenres(book, book.getId());
+
+        return book.getId();
+    }
+
+    private long batchInsertGenresRelationsFor(Book book) {
         // Использовать метод batchUpdate
         // Вам потребуется определить SQL запросы для каждой из таблиц
         long authorId = insertAutorAndGetId(book);
@@ -142,49 +164,58 @@ public class JdbcBookRepository implements BookRepository {
         long bookId = insertBookAndGetId(book, authorId);
 
         insertGenres(book, bookId);
+
+        return bookId;
     }
 
     private void insertGenres(Book book, long bookId) {
         // Вставка жанров, если они есть
         if (book.getGenres() != null && !book.getGenres().isEmpty()) {
+            List<Genre> genreList = new ArrayList<>(book.getGenres());
+            List<Genre> copiedgenreList = new ArrayList<>(genreList);
+
+
+            genreList.removeIf(genreRepository.findAll()::contains);
+            if (genreList.size() == 0) {
+                insetBooksGenres(bookId, copiedgenreList);
+                return;
+            }
             List<Object[]> genresParams = new ArrayList<>();
-            for (Genre genre : book.getGenres()) {
+            for (Genre genre : genreList) {
                 Object[] params = new Object[]{genre.getName()};
                 genresParams.add(params);
             }
-//            int[] genresIds = jdbc.batchUpdate("insert into genres (name) values (?) on duplicate key update" +
-//                    " id=last_insert_id(id), name=values(name)", genresParams);
-            int[] genresIds = jdbc.batchUpdate("insert into genres (name) values (?)", genresParams);
-
-            // Каждая пара книга-жанр становится записью в books_genres
-            List<Object[]> booksGenresParams = new ArrayList<>();
-            int i = 0;
-            for (int genreId : genresIds) {
-                Object[] params = new Object[]{bookId, genresIds[i++]};
-                booksGenresParams.add(params);
-            }
-            jdbc.batchUpdate("insert into books_genres (book_id, genre_id) values (?, ?)", booksGenresParams);
+            jdbc.batchUpdate("insert into genres (name) values (?)", genresParams);
+            insetBooksGenres(bookId, copiedgenreList);
         }
+    }
+
+    private void insetBooksGenres(long bookId, List<Genre> genreList) {
+        List<Object[]> booksGenresParams = new ArrayList<>();
+        for (long idGanre: genreList.stream().map(g -> g.getId()).toList()) {
+                Object[] params = new Object[]{bookId, idGanre};
+                booksGenresParams.add(params);
+        }
+        jdbc.batchUpdate("insert into books_genres (book_id, genre_id) values (?, ?)", booksGenresParams);
     }
 
     private long insertBookAndGetId(Book book, long authorId) {
         // Вставка записи книги
         KeyHolder keyHolderBook = new GeneratedKeyHolder();
-        jdbc.update(connection -> {
+        int rezUpdate = jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("insert into books (title, author_id) values (?, ?)",
                     PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, book.getTitle());
             ps.setLong(2, authorId);
             return ps;
         }, keyHolderBook);
-        long bookId = keyHolderBook.getKey().longValue(); // Получаем сгенерированный идентификатор книги
-        return bookId;
+        return keyHolderBook.getKey().longValue();
     }
 
     private long insertAutorAndGetId(Book book) {
         // Вставка записи об авторе, если это необходимо (запрос с предположением MySQL и поддержкой ON DUPLICATE KEY)
         KeyHolder keyHolderAuthor = new GeneratedKeyHolder();
-        return  jdbc.update(connection -> {
+        return jdbc.update(connection -> {
 //            PreparedStatement ps = connection.prepareStatement("insert into authors (full_name) values (?)" +
 //                    " on duplicate key update id=last_insert_id(id), full_name=values(full_name)", new String[]{"id"});
             PreparedStatement ps = connection.prepareStatement("insert into authors (full_name) values (?)");
@@ -198,7 +229,7 @@ public class JdbcBookRepository implements BookRepository {
     private void removeGenresRelationsFor(Book book) {
         //...
         String sql = "delete from books_genres b " +
-                "where b.book_id = bookid";
+                "where b.book_id = :bookId";
 
         Map<String, Object> namedParameters = Map.of("bookId", book.getId());
 
