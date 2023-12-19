@@ -1,33 +1,36 @@
-package ru.otus.hw03.service;
+package ru.otus.hw04.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import ru.otus.hw03.dao.CsvQuestionDao;
-import ru.otus.hw03.domain.Answer;
-import ru.otus.hw03.domain.Question;
-import ru.otus.hw03.domain.Student;
-import ru.otus.hw03.domain.TestResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.otus.hw04.dao.CsvQuestionDao;
+import ru.otus.hw04.domain.Answer;
+import ru.otus.hw04.domain.Question;
+import ru.otus.hw04.domain.Student;
+import ru.otus.hw04.domain.TestResult;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class TestServiceImplTest {
-    @Mock
+
+    @MockBean
     private CsvQuestionDao csvQuestionDao;
 
-    @Mock
+    @MockBean
     private LocalizedIOService ioService;
+
+    @Autowired
+    private TestServiceImpl testService;
 
     @Test
     void executeTestFor() {
-        when(ioService.readIntForRangeWithPromptLocalized(1, 3, "TestService.answer.the.answer",
-                "TestService.answer.the.error")).thenReturn(2);
+
         String textQuestion = "Question1";
         Answer answer1 = new Answer("Answer1", false);
         Answer answer2 = new Answer("Answer2", true);
@@ -39,8 +42,9 @@ public class TestServiceImplTest {
         Question question = new Question(textQuestion, answerList);
         List<Question> questionList = new ArrayList<>();
         questionList.add(question);
+        when(ioService.readIntForRangeWithPromptLocalized(1, 3, "TestService.answer.the.answer",
+                "TestService.answer.the.error")).thenReturn(2);
         when(csvQuestionDao.findAll()).thenReturn(questionList);
-        TestServiceImpl testService = new TestServiceImpl(ioService, csvQuestionDao);
         TestResult testResult = testService.executeTestFor(new Student("firstNameStudent", "lastNameStudent"));
         Assertions.assertEquals(1, testResult.getRightAnswersCount());
     }
