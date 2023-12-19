@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import ru.otus.hw04.config.AppConfig;
 import ru.otus.hw04.domain.Question;
 
@@ -25,7 +23,6 @@ class CsvQuestionDaoIntegrationTest {
     private CsvQuestionDao csvQuestionDao; //
 
     private static final int EXPECTED_QUESTION_COUNT = 6;
-
 
 
     @Test
