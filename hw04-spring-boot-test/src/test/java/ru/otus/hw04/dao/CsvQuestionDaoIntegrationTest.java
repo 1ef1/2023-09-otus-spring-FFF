@@ -18,11 +18,6 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 class CsvQuestionDaoIntegrationTest {
 
-    @DynamicPropertySource
-    static void shellProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.shell.interactive.enabled", () -> "false");
-    }
-
     @MockBean
     private AppConfig appConfig;
 
