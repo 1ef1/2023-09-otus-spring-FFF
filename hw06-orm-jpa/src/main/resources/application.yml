@@ -1,6 +1,9 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:maindb
+#    url: jdbc:h2:mem:maindb
+    url : jdbc:postgresql://localhost:5432/pbo
+    username : postgres
+    password : 123
   sql:
     init:
       mode: always

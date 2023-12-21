@@ -10,18 +10,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Entity
-@Table(name = "authors")
+@Table(name = "comments")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Author {
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(name = "book_id", nullable = false)
+    private long bookId;
 
-    // Здесь необходимо добавить связь с книгами, если такая связь необходима
+    @Column(name = "comment_text", nullable = false)
+    private String commentText;
 }
