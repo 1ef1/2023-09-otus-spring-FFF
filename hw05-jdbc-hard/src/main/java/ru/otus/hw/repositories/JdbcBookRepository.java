@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,8 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        String sql = "select id, title, author_id from books where id = :id";
+        String sql = "select b.id book_id, b.title, b.author_id, a.full_name  from books b , authors a " +
+                "where b.author_id =a.id  and b.id = :id";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("id", id);
@@ -68,9 +68,7 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public void deleteById(long id) {
-        //...
         String sql = "delete from books where books.id = :bookId";
-
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("bookId", id);
         namedParameterJdbcOperations.update(sql, parameters);
@@ -112,9 +110,6 @@ public class JdbcBookRepository implements BookRepository {
 
     private Book insert(Book book) {
         var keyHolder = new GeneratedKeyHolder();
-
-        //...
-        //noinspection DataFlowIssue
         if (keyHolder.getKey() != null) {
             book.setId(keyHolder.getKeyAs(Long.class));
         }
@@ -124,7 +119,6 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private Book update(Book book) {
-        //...
         // Выбросить EntityNotFoundException если не обновлено ни одной записи в БД // Вопрос если меняется жанр ??
 
 //        boolean noGenreUpdate = false;
@@ -172,26 +166,18 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private long batchInsertGenresRelationsFor(Book book) {
-        // Использовать метод batchUpdate
-        // Вам потребуется определить SQL запросы для каждой из таблиц
         long authorId = insertAutorAndGetId(book);
-
         long bookId = insertBookAndGetId(book, authorId);
-
         insertGenres(book, bookId);
-
         return bookId;
     }
 
     private void insertGenres(Book book, long bookId) {
-        // Вставка жанров, если они есть
         if (book.getGenres() != null && !book.getGenres().isEmpty()) {
             List<Genre> genreList = new ArrayList<>(book.getGenres());
             List<Genre> copiedgenreList = new ArrayList<>(genreList);
-
-
             genreList.removeIf(genreRepository.findAll()::contains);
-            if (genreList.size() == 0) {
+            if (genreList.isEmpty()) {
                 insetBooksGenres(bookId, copiedgenreList);
                 return;
             }
@@ -207,7 +193,7 @@ public class JdbcBookRepository implements BookRepository {
 
     private void insetBooksGenres(long bookId, List<Genre> genreList) {
         List<Object[]> booksGenresParams = new ArrayList<>();
-        for (long idGanre : genreList.stream().map(g -> g.getId()).toList()) {
+        for (long idGanre : genreList.stream().map(Genre::getId).toList()) {
             Object[] params = new Object[]{bookId, idGanre};
             booksGenresParams.add(params);
         }
@@ -215,7 +201,6 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private long insertBookAndGetId(Book book, long authorId) {
-        // Вставка записи книги
         KeyHolder keyHolderBook = new GeneratedKeyHolder();
         int rezUpdate = jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("insert into books (title, author_id) values (?, ?)",
@@ -228,21 +213,15 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private long insertAutorAndGetId(Book book) {
-        // Вставка записи об авторе, если это необходимо (запрос с предположением MySQL и поддержкой ON DUPLICATE KEY)
         KeyHolder keyHolderAuthor = new GeneratedKeyHolder();
         return jdbc.update(connection -> {
-//            PreparedStatement ps = connection.prepareStatement("insert into authors (full_name) values (?)" +
-//                    " on duplicate key update id=last_insert_id(id), full_name=values(full_name)", new String[]{"id"});
             PreparedStatement ps = connection.prepareStatement("insert into authors (full_name) values (?)");
             ps.setString(1, book.getAuthor().getFullName());
             return ps;
         }, keyHolderAuthor);
-//        long authorId = keyHolderAuthor.getKey().longValue(); // Получаем сгенерированный идентификатор автора
-//        return authorId;
     }
 
     private void removeGenresRelationsFor(Book book) {
-        //...
         String sql = "delete from books_genres b " +
                 "where b.book_id = :bookId";
 
@@ -270,7 +249,6 @@ public class JdbcBookRepository implements BookRepository {
         }
     }
 
-    // Использовать для findById
     @SuppressWarnings("ClassCanBeRecord")
     @RequiredArgsConstructor
     private class BookResultSetExtractor implements ResultSetExtractor<Book> {
@@ -281,14 +259,12 @@ public class JdbcBookRepository implements BookRepository {
                 long bookId = rs.getLong("id");
                 String title = rs.getString("title");
                 long authorId = rs.getLong("author_id");
-
-                Author author = getAuthorById(authorId);
-                Book book = new Book(bookId, title, author, Collections.emptyList());
-                var relations = getAllGenreRelations();
-                var genres = genreRepository.findAll();
-                List<Book> bookList = List.of(book);
-                mergeBooksInfo(List.of(book), genres, relations);
-                return bookList.get(0);
+                String authorName = rs.getString("full_name");
+                Author author = new Author(authorId, authorName);
+                var genresIdSet = genreRepository.findAllByBookId(bookId);
+                var genres = genreRepository.findAllByIds(genresIdSet);
+                Book book = new Book(bookId, title, author, genres);
+                return book;
             } else {
                 return null;
             }
