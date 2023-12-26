@@ -1,6 +1,7 @@
 package ru.otus.hw.repositories;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -13,6 +14,7 @@ import ru.otus.hw.models.Genre;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -33,20 +35,16 @@ class JpaBookRepositoryTest {
     @Autowired
     private TestEntityManager em;
 
-    private List<Author> dbAuthors;
-    private List<Genre> dbGenres;
-    private List<Book> dbBooks;
 
     @DisplayName("должен загружать книгу по id")
     @Test
+    @Order(1)
     void shouldReturnCorrectBookById() throws SQLException {
-//        Book expectedBook = dbBooks.get(0); // Получаем первую книгу для теста
-//        Console.main("-browser");
         Author author = new Author(0, "Author1");
         authorRepository.save(author);
 
-        Genre genre = new Genre(0, "Author1");
-        genreRepository.save(genre);
+        Genre genre = new Genre(0, "Genre1");
+        Genre genreSave = genreRepository.save(genre);
 
         Book expectedBook = new Book(0, "Title1", author, Collections.singletonList(genre));
 
@@ -69,7 +67,11 @@ class JpaBookRepositoryTest {
 
         assertThat(actualBook2.getAuthor()).isEqualTo(expectedAuthor);
 
+        Genre genreUpdate = new Genre(genreSave.getId(), "Genre2");
+        Genre genreUpdateResult = genreRepository.save(genreUpdate);
+        var v1 = genreRepository.findAllByIds(Set.of(genreUpdateResult.getId()));
     }
+
 
 
 }
