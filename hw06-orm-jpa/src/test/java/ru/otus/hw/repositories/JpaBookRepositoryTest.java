@@ -66,10 +66,12 @@ class JpaBookRepositoryTest {
         Book actualBook2 = bookRepository.findById(b1.getId()).orElse(null);
 
         assertThat(actualBook2.getAuthor()).isEqualTo(expectedAuthor);
+        assertThat(authorRepository.findById(2).orElse(null)).isEqualTo(expectedAuthor);
 
         Genre genreUpdate = new Genre(genreSave.getId(), "Genre2");
         Genre genreUpdateResult = genreRepository.save(genreUpdate);
         var v1 = genreRepository.findAllByIds(Set.of(genreUpdateResult.getId()));
+        assertThat(v1.get(0)).isEqualTo(genreUpdate);
     }
 
 
