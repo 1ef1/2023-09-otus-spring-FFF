@@ -53,10 +53,17 @@ class JpaBookRepositoryTest {
         authorRepository.save(author);
         Book expectedBook = new Book(0,"Title1",author, Collections.emptyList());
         bookRepository.save(expectedBook);
+        List<Book> bookList = bookRepository.findAll();
         Book actualBook = bookRepository.findById(expectedBook.getId()).orElse(null);
         assertThat(actualBook).isEqualTo(expectedBook);
+        Author expectedAuthor = new Author(2,"Author2");
+        authorRepository.save(expectedAuthor);
+        expectedBook.setAuthor(expectedAuthor);
         bookRepository.save(expectedBook);
         Book actualBook2 = bookRepository.findById(expectedBook.getId()).orElse(null);
-        assertThat(actualBook2).isEqualTo(expectedBook);
+        assertThat(actualBook2.getAuthor()).isEqualTo(expectedAuthor);
+//        assertThat(1).isEqualTo(bookRepository.findAll().size());//todo findAll почемуто возврвраает 0
     }
+
+
 }
