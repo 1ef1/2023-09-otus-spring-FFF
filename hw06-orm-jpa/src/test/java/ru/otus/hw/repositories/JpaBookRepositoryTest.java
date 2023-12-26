@@ -1,7 +1,5 @@
 package ru.otus.hw.repositories;
 
-import org.h2.tools.Console;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-//import static ru.otus.hw.repositories.JdbcBookRepositoryTest.*;
 
 @DisplayName("Репозиторий JPA для работы с книгами")
 @DataJpaTest
@@ -31,38 +28,47 @@ class JpaBookRepositoryTest {
     private AuthorRepository authorRepository;
 
     @Autowired
+    private GenreRepository genreRepository;
+
+    @Autowired
     private TestEntityManager em;
 
     private List<Author> dbAuthors;
     private List<Genre> dbGenres;
     private List<Book> dbBooks;
 
-    @BeforeEach
-//    void setUp() {
-//        dbAuthors = getDbAuthors();
-//        dbGenres = getDbGenres();
-//        dbBooks = getDbBooks(dbAuthors, dbGenres);
-//    }
-
     @DisplayName("должен загружать книгу по id")
     @Test
     void shouldReturnCorrectBookById() throws SQLException {
 //        Book expectedBook = dbBooks.get(0); // Получаем первую книгу для теста
 //        Console.main("-browser");
-        Author author = new Author(0,"Author1");
+        Author author = new Author(0, "Author1");
         authorRepository.save(author);
-        Book expectedBook = new Book(0,"Title1",author, Collections.emptyList());
+
+        Genre genre = new Genre(0, "Author1");
+        genreRepository.save(genre);
+
+        Book expectedBook = new Book(0, "Title1", author, Collections.singletonList(genre));
+
         bookRepository.save(expectedBook);
-        List<Book> bookList = bookRepository.findAll();
         Book actualBook = bookRepository.findById(expectedBook.getId()).orElse(null);
         assertThat(actualBook).isEqualTo(expectedBook);
-        Author expectedAuthor = new Author(2,"Author2");
-        authorRepository.save(expectedAuthor);
-        expectedBook.setAuthor(expectedAuthor);
-        bookRepository.save(expectedBook);
-        Book actualBook2 = bookRepository.findById(expectedBook.getId()).orElse(null);
+
+         Author expectedAuthor = new Author(2, "Author2");
+         authorRepository.save(expectedAuthor);
+
+        assertThat(bookRepository.findAll().size()).isEqualTo(1);
+        assertThat(authorRepository.findAll().size()).isEqualTo(2);
+
+        actualBook.setAuthor(expectedAuthor);
+        Book b1 = new Book(actualBook.getId(),actualBook.getTitle(),actualBook.getAuthor(),actualBook.getGenres());
+        bookRepository.deleteById(actualBook.getId());
+        assertThat(bookRepository.findById(b1.getId()).orElse(null)).isEqualTo(null);
+        bookRepository.save(b1);
+        Book actualBook2 = bookRepository.findById(b1.getId()).orElse(null);
+
         assertThat(actualBook2.getAuthor()).isEqualTo(expectedAuthor);
-//        assertThat(1).isEqualTo(bookRepository.findAll().size());//todo findAll почемуто возврвраает 0
+
     }
 
 

@@ -35,7 +35,6 @@ public class JpaBookRepository implements BookRepository {
         }
     }
 
-    // The update logic can be done by fetching and modifying the entity or using merge
     @Transactional
     public Book save(Book book) {
         if (book.getId() == 0) {
