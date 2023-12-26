@@ -55,5 +55,8 @@ class JpaBookRepositoryTest {
         bookRepository.save(expectedBook);
         Book actualBook = bookRepository.findById(expectedBook.getId()).orElse(null);
         assertThat(actualBook).isEqualTo(expectedBook);
+        bookRepository.save(expectedBook);
+        Book actualBook2 = bookRepository.findById(expectedBook.getId()).orElse(null);
+        assertThat(actualBook2).isEqualTo(expectedBook);
     }
 }
