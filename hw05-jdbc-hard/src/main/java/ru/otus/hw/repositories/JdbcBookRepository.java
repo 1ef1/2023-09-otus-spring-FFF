@@ -128,15 +128,9 @@ public class JdbcBookRepository implements BookRepository {
                 insertGenres(book, book.getId());
             }
         } else {
-            insertGenres(book, book.getId());
-        }
-        int[] updateCounts = updateBook(book);
-
-        boolean noRowsAffected = Arrays.stream(updateCounts).allMatch(count -> count == 0);
-
-        if (noRowsAffected) {
             throw new EntityNotFoundException("no updated rows");
         }
+        updateBook(book);
         return book;
     }
 
@@ -165,14 +159,9 @@ public class JdbcBookRepository implements BookRepository {
         if (genreList.isEmpty()) {
             insetBooksGenres(bookId, copiedgenreList);
             return;
+        } else {
+            throw new EntityNotFoundException("genre doesn't exist");
         }
-        List<Object[]> genresParams = new ArrayList<>();
-        for (Genre genre : genreList) {
-            Object[] params = new Object[]{genre.getName()};
-            genresParams.add(params);
-        }
-        jdbc.batchUpdate("insert into genres (name) values (?)", genresParams);
-        insetBooksGenres(bookId, copiedgenreList);
     }
 
     private void insetBooksGenres(long bookId, List<Genre> genreList) {
