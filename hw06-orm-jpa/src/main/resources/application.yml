@@ -11,3 +11,5 @@ spring:
       data-locations: data.sql
   jpa:
     show-sql: true
+    hibernate:
+      ddl-auto: none

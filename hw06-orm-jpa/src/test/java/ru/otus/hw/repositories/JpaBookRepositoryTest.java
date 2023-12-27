@@ -36,7 +36,7 @@ class JpaBookRepositoryTest {
     private TestEntityManager em;
 
 
-    @DisplayName("должен загружать книгу по id")
+    @DisplayName("производит проверку работу репозиториев")
     @Test
     @Order(1)
     void shouldReturnCorrectBookById() throws SQLException {
