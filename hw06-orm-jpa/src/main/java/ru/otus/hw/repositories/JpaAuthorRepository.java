@@ -3,7 +3,6 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Author;
 
@@ -28,7 +27,6 @@ public class JpaAuthorRepository implements AuthorRepository {
         return Optional.ofNullable(author);
     }
 
-    @Transactional
     public Author save(Author author) {
         if (author.getId() == 0) {
             em.persist(author);

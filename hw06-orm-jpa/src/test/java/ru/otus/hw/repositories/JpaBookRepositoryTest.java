@@ -38,7 +38,6 @@ class JpaBookRepositoryTest {
 
     @DisplayName("производит проверку работу репозиториев")
     @Test
-    @Order(1)
     void shouldReturnCorrectBookById() throws SQLException {
         Author author = new Author(0, "Author1");
         authorRepository.save(author);

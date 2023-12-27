@@ -3,7 +3,6 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Genre;
 
@@ -33,7 +32,6 @@ public class JpaGenreRepository implements GenreRepository {
         return query.getResultList();
     }
 
-    @Transactional
     public Genre save(Genre genre) {
         if (genre.getId() == 0) {
             entityManager.persist(genre);

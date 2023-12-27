@@ -3,7 +3,6 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Comment;
 
@@ -15,7 +14,6 @@ public class JpaCommentRepository implements CommentRepository {
 
     @PersistenceContext
     private EntityManager em;
-
 
 
     @Override
@@ -32,7 +30,6 @@ public class JpaCommentRepository implements CommentRepository {
         return query.getResultList();
     }
 
-    @Transactional
     public Comment save(Comment comment) {
         if (comment.getId() == 0) {
             em.persist(comment);
@@ -43,7 +40,6 @@ public class JpaCommentRepository implements CommentRepository {
     }
 
     @Override
-    @Transactional
     public void deleteById(long id) {
         Comment comment = em.find(Comment.class, id);
         if (comment != null) {
