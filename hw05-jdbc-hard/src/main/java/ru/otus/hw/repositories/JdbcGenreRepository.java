@@ -8,7 +8,10 @@ import ru.otus.hw.models.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Repository
 public class JdbcGenreRepository implements GenreRepository {
@@ -24,14 +27,6 @@ public class JdbcGenreRepository implements GenreRepository {
     @Override
     public List<Genre> findAll() {
         return jdbc.query("select id, name from genres", new GnreRowMapper());
-    }
-
-    public Set<Long> findAllByBookId(Long bookId) {
-        String sql = "select genre_id  from books_genres where book_id = :bookId";
-        Map<String, Object> namedParameters = Collections.singletonMap("bookId", bookId);
-
-        return  new HashSet<>(namedParameterJdbcOperations.query(sql, namedParameters,
-                (rs, rowNum) -> rs.getLong("genre_id")));
     }
 
     @Override

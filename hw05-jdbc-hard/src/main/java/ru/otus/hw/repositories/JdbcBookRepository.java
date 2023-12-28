@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,14 +39,16 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        String sql = "select b.id book_id, b.title, b.author_id, a.full_name  from books b , authors a " +
-                "where b.author_id =a.id  and b.id = :id";
+        String sql = "SELECT b.id, b.title, a.id AS author_id, a.full_name, g.id AS genre_id, g.name " +
+                "FROM books b " +
+                "JOIN authors a ON a.id = b.author_id " +
+                "JOIN books_genres bg ON bg.book_id = b.id " +
+                "JOIN genres g ON g.id = bg.genre_id " +
+                "WHERE b.id = :id";
 
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("id", id);
+        MapSqlParameterSource parameters = new MapSqlParameterSource().addValue("id", id);
 
-        Book book = namedParameterJdbcOperations.query(sql, parameters, new BookResultSetExtractor());
-        return Optional.ofNullable(book);
+        return namedParameterJdbcOperations.query(sql, parameters, new BookResultSetExtractor());
     }
 
     @Override
@@ -225,39 +226,32 @@ public class JdbcBookRepository implements BookRepository {
         }
     }
 
-    @SuppressWarnings("ClassCanBeRecord")
-    @RequiredArgsConstructor
-    private class BookResultSetExtractor implements ResultSetExtractor<Book> {
+    public class BookResultSetExtractor implements ResultSetExtractor<Optional<Book>> {
 
         @Override
-        public Book extractData(ResultSet rs) throws SQLException, DataAccessException {
-            if (rs.next()) {
-                long bookId = rs.getLong("id");
-                String title = rs.getString("title");
-                long authorId = rs.getLong("author_id");
-                String authorName = rs.getString("full_name");
-                Author author = new Author(authorId, authorName);
-                var genresIdSet = genreRepository.findAllByBookId(bookId);
-                var genres = genreRepository.findAllByIds(genresIdSet);
-                Book book = new Book(bookId, title, author, genres);
-                return book;
-            } else {
-                return null;
+        public Optional<Book> extractData(ResultSet rs) throws SQLException, DataAccessException {
+            if (!rs.next()) {
+                return Optional.empty();
             }
-        }
 
-        private Author getAuthorById(long authorId) {
-            String sql = "select id, full_name from authors where id = :authorid";
+            Long bookId = rs.getLong("id");
+            String title = rs.getString("title");
+            Long authorId = rs.getLong("author_id");
+            String fullName = rs.getString("full_name");
 
-            MapSqlParameterSource parameters = new MapSqlParameterSource();
-            parameters.addValue("authorid", authorId);
+            Author author = new Author(authorId, fullName);
 
-            return namedParameterJdbcOperations.queryForObject(sql, parameters, (rs, rowNum) -> {
-                long id = rs.getLong("id");
-                String fullName = rs.getString("full_name");
-
-                return new Author(id, fullName);
-            });
+            List<Genre> genreList = new ArrayList<>();
+            do {
+                Long genreId = rs.getLong("genre_id");
+                String name = rs.getString("name");
+                if (genreId > 0) {
+                    Genre genre = new Genre(genreId, name);
+                    genreList.add(genre);
+                }
+            } while (rs.next());
+            Book book = new Book(bookId, title, author, genreList);
+            return Optional.of(book);
         }
     }
 
