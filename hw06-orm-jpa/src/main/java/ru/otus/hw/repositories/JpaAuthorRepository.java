@@ -13,7 +13,11 @@ import java.util.Optional;
 public class JpaAuthorRepository implements AuthorRepository {
 
     @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
+
+    public JpaAuthorRepository(EntityManager em) {
+        this.em = em;
+    }
 
     @Override
     public List<Author> findAll() {

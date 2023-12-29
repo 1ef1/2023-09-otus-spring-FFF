@@ -22,6 +22,4 @@ public class Author {
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
-
-    // Здесь необходимо добавить связь с книгами, если такая связь необходима
 }
