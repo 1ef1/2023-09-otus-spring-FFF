@@ -7,10 +7,13 @@ import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Book;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.FETCH;
+
 
 @Repository
 public class JpaBookRepository implements BookRepository {
@@ -20,7 +23,16 @@ public class JpaBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        return Optional.ofNullable(em.find(Book.class, id));
+        EntityGraph<?> entityGraph = em.getEntityGraph("book-genres-entity-graph");
+        entityGraph.addAttributeNodes("author");
+        entityGraph.addAttributeNodes("genre");
+
+        Map<String, Object> hints = new HashMap<>();
+        hints.put("javax.persistence.fetchgraph", entityGraph);
+
+        Book book = em.find(Book.class, id, hints);
+
+        return Optional.ofNullable(book);
     }
 
     @Override

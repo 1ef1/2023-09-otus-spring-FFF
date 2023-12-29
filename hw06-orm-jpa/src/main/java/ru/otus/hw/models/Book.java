@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+
 import java.util.List;
 
 @Entity
@@ -40,6 +41,7 @@ public class Book {
     private Author author;
 
     @ManyToMany(fetch = FetchType.LAZY)
+//    @Fetch(FetchMode.SUBSELECT)
     @JoinTable(
             name = "books_genres",
             joinColumns = @JoinColumn(name = "book_id"),
