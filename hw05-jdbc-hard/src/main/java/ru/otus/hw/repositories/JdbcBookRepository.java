@@ -108,31 +108,21 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private Book insert(Book book) {
-        var keyHolder = new GeneratedKeyHolder();
-        if (keyHolder.getKey() != null) {
-            book.setId(keyHolder.getKeyAs(Long.class));
-        }
-        long newIdBook = batchInsertGenresRelationsFor(book);
-        book.setId(newIdBook);
+        batchInsertGenresRelationsFor(book);
         return book;
     }
 
     private Book update(Book book) {
-
-        Optional<Book> book1 = this.findById(book.getId());
-        if (book1.isPresent()) {
-            if (!book1.get().getGenres().equals(book.getGenres())) {
-                removeGenresRelationsFor(book);
-                insertGenres(book, book.getId());
-            }
-        } else {
+        if (updateBook(book) == 0) {
             throw new EntityNotFoundException("no updated rows");
+        } else {
+            removeGenresRelationsFor(book);
+            insertGenres(book, book.getId());
         }
-        updateBook(book);
         return book;
     }
 
-    private int[] updateBook(Book book) {
+    private int updateBook(Book book) {
         String updateSql = "UPDATE books SET title = :title, author_id = :authorId WHERE id = :id";
 
         SqlParameterSource namedParameters = new MapSqlParameterSource()
@@ -140,13 +130,13 @@ public class JdbcBookRepository implements BookRepository {
                 .addValue("authorId", book.getAuthor().getId())
                 .addValue("id", book.getId());
 
-        return namedParameterJdbcOperations.batchUpdate(updateSql, new SqlParameterSource[]{namedParameters});
+        return namedParameterJdbcOperations.update(updateSql, namedParameters);
     }
 
-    private long batchInsertGenresRelationsFor(Book book) {
+    private void batchInsertGenresRelationsFor(Book book) {
         long bookId = insertBookAndGetId(book);
+        book.setId(bookId);
         insertGenres(book, bookId);
-        return bookId;
     }
 
     private void insertGenres(Book book, long bookId) {
