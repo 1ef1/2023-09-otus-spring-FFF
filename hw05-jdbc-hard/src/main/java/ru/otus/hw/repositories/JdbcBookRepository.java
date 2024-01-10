@@ -20,12 +20,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -91,51 +90,39 @@ public class JdbcBookRepository implements BookRepository {
 
     private void mergeBooksInfo(List<Book> booksWithoutGenres, List<Genre> genres,
                                 List<BookGenreRelation> relations) {
-        Map<Long, List<Genre>> bookIdToGenresMap = new HashMap<>();
-
-        for (BookGenreRelation relation : relations) {
-            long bookId = relation.bookId();
-            long genreId = relation.genreId();
-            Genre genre = genreRepository.findAllByIds(Set.of(genreId)).stream().findFirst().orElse(null);
-            if (genre != null) {
-                bookIdToGenresMap.computeIfAbsent(bookId, k -> new ArrayList<>()).add(genre);
-            }
-        }
-
         for (Book book : booksWithoutGenres) {
-            long bookId = book.getId();
-            List<Genre> bookGenres = bookIdToGenresMap.getOrDefault(bookId, new ArrayList<>());
+            List<Genre> bookGenres = getBookGenres(genres, relations, book.getId());
             book.setGenres(bookGenres);
         }
+    }
 
+    private List<Genre> getBookGenres(List<Genre> genres, List<BookGenreRelation> relations, long bookId) {
+        List<Long> genreIds = relations.stream()
+                .filter(relation -> relation.bookId() == bookId)
+                .map(BookGenreRelation::genreId)
+                .toList();
+
+        return genres.stream()
+                .filter(genre -> genreIds.contains(genre.getId()))
+                .collect(Collectors.toList());
     }
 
     private Book insert(Book book) {
-        var keyHolder = new GeneratedKeyHolder();
-        if (keyHolder.getKey() != null) {
-            book.setId(keyHolder.getKeyAs(Long.class));
-        }
-        long newIdBook = batchInsertGenresRelationsFor(book);
-        book.setId(newIdBook);
+        batchInsertGenresRelationsFor(book);
         return book;
     }
 
     private Book update(Book book) {
-
-        Optional<Book> book1 = this.findById(book.getId());
-        if (book1.isPresent()) {
-            if (!book1.get().getGenres().equals(book.getGenres())) {
-                removeGenresRelationsFor(book);
-                insertGenres(book, book.getId());
-            }
-        } else {
+        if (updateBook(book) == 0) {
             throw new EntityNotFoundException("no updated rows");
+        } else {
+            removeGenresRelationsFor(book);
+            insertGenres(book, book.getId());
         }
-        updateBook(book);
         return book;
     }
 
-    private int[] updateBook(Book book) {
+    private int updateBook(Book book) {
         String updateSql = "UPDATE books SET title = :title, author_id = :authorId WHERE id = :id";
 
         SqlParameterSource namedParameters = new MapSqlParameterSource()
@@ -143,14 +130,13 @@ public class JdbcBookRepository implements BookRepository {
                 .addValue("authorId", book.getAuthor().getId())
                 .addValue("id", book.getId());
 
-        return namedParameterJdbcOperations.batchUpdate(updateSql, new SqlParameterSource[]{namedParameters});
+        return namedParameterJdbcOperations.update(updateSql, namedParameters);
     }
 
-    private long batchInsertGenresRelationsFor(Book book) {
-        long authorId = insertAutorAndGetId(book);
-        long bookId = insertBookAndGetId(book, authorId);
+    private void batchInsertGenresRelationsFor(Book book) {
+        long bookId = insertBookAndGetId(book);
+        book.setId(bookId);
         insertGenres(book, bookId);
-        return bookId;
     }
 
     private void insertGenres(Book book, long bookId) {
@@ -159,7 +145,6 @@ public class JdbcBookRepository implements BookRepository {
         genreList.removeIf(genreRepository.findAll()::contains);
         if (genreList.isEmpty()) {
             insetBooksGenres(bookId, copiedgenreList);
-            return;
         } else {
             throw new EntityNotFoundException("genre doesn't exist");
         }
@@ -174,13 +159,13 @@ public class JdbcBookRepository implements BookRepository {
         jdbc.batchUpdate("insert into books_genres (book_id, genre_id) values (?, ?)", booksGenresParams);
     }
 
-    private long insertBookAndGetId(Book book, long authorId) {
+    private long insertBookAndGetId(Book book) {
 
         String insertSql = "INSERT INTO books (title, author_id) VALUES (:title, :authorId)";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("title", book.getTitle());
-        parameters.addValue("authorId", authorId);
+        parameters.addValue("authorId", book.getAuthor().getId());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
