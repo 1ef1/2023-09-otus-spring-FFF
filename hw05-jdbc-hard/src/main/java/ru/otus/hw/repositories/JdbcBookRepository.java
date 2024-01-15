@@ -16,10 +16,10 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -151,12 +151,13 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private void insetBooksGenres(long bookId, List<Genre> genreList) {
-        List<Object[]> booksGenresParams = new ArrayList<>();
+        String insertSql = "insert into books_genres (book_id, genre_id) values (:bookId, :genreId)";
         for (long idGanre : genreList.stream().map(Genre::getId).toList()) {
-            Object[] params = new Object[]{bookId, idGanre};
-            booksGenresParams.add(params);
+            MapSqlParameterSource parameters = new MapSqlParameterSource();
+            parameters.addValue("bookId", bookId);
+            parameters.addValue("genreId", idGanre);
+            namedParameterJdbcOperations.update(insertSql, parameters);
         }
-        jdbc.batchUpdate("insert into books_genres (book_id, genre_id) values (?, ?)", booksGenresParams);
     }
 
     private long insertBookAndGetId(Book book) {
@@ -172,15 +173,6 @@ public class JdbcBookRepository implements BookRepository {
         namedParameterJdbcOperations.update(insertSql, parameters, keyHolder);
 
         return Objects.requireNonNull(keyHolder.getKey()).longValue();
-    }
-
-    private long insertAutorAndGetId(Book book) {
-        KeyHolder keyHolderAuthor = new GeneratedKeyHolder();
-        return jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("insert into authors (full_name) values (?)");
-            ps.setString(1, book.getAuthor().getFullName());
-            return ps;
-        }, keyHolderAuthor);
     }
 
     private void removeGenresRelationsFor(Book book) {
@@ -215,28 +207,28 @@ public class JdbcBookRepository implements BookRepository {
 
         @Override
         public Optional<Book> extractData(ResultSet rs) throws SQLException, DataAccessException {
-            if (!rs.next()) {
-                return Optional.empty();
+            Map<Long, Book> books = new HashMap<>();
+            while (rs.next()) {
+                Long id = rs.getLong("id");
+                if (!books.containsKey(id)) {
+                    Book book = new Book();
+                    book.setId(id);
+                    book.setTitle(rs.getString("title"));
+                    Author author = new Author();
+                    author.setId(rs.getLong("author_id"));
+                    author.setFullName(rs.getString("full_name"));
+                    book.setAuthor(author);
+                    book.setGenres(new ArrayList<>());
+                    books.put(id, book);
+                }
+
+                Genre genre = new Genre();
+                genre.setId(rs.getLong("genre_id"));
+                genre.setName(rs.getString("name"));
+                books.get(id).getGenres().add(genre);
             }
 
-            Long bookId = rs.getLong("id");
-            String title = rs.getString("title");
-            Long authorId = rs.getLong("author_id");
-            String fullName = rs.getString("full_name");
-
-            Author author = new Author(authorId, fullName);
-
-            List<Genre> genreList = new ArrayList<>();
-            do {
-                Long genreId = rs.getLong("genre_id");
-                String name = rs.getString("name");
-                if (genreId > 0) {
-                    Genre genre = new Genre(genreId, name);
-                    genreList.add(genre);
-                }
-            } while (rs.next());
-            Book book = new Book(bookId, title, author, genreList);
-            return Optional.of(book);
+            return Optional.ofNullable(books.values().stream().findFirst().orElse(null));
         }
     }
 
