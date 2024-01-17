@@ -2,6 +2,7 @@ package ru.otus.hw.repositories;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -16,6 +17,7 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -108,6 +110,8 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private Book insert(Book book) {
+        long bookId = insertBookAndGetId(book);
+        book.setId(bookId);
         batchInsertGenresRelationsFor(book);
         return book;
     }
@@ -117,7 +121,7 @@ public class JdbcBookRepository implements BookRepository {
             throw new EntityNotFoundException("no updated rows");
         } else {
             removeGenresRelationsFor(book);
-            insertGenres(book, book.getId());
+            batchInsertGenresRelationsFor(book);
         }
         return book;
     }
@@ -134,9 +138,21 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private void batchInsertGenresRelationsFor(Book book) {
-        long bookId = insertBookAndGetId(book);
-        book.setId(bookId);
-        insertGenres(book, bookId);
+        String insertBooksGenres = "insert into books_genres (book_id, genre_id) values  (?, ?)";
+        List<Genre> genreList = book.getGenres();
+
+        jdbc.batchUpdate(insertBooksGenres, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
+                preparedStatement.setLong(1, book.getId());
+                preparedStatement.setLong(2, genreList.get(i).getId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return genreList.size();
+            }
+        });
     }
 
     private void insertGenres(Book book, long bookId) {
