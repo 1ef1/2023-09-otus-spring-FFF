@@ -88,23 +88,20 @@ public class JdbcBookRepository implements BookRepository {
                 new JdbcBookRepository.BookGenreRelationRowMapper());
     }
 
-    private void mergeBooksInfo(List<Book> booksWithoutGenres, List<Genre> genres,
-                                List<BookGenreRelation> relations) {
-        for (Book book : booksWithoutGenres) {
-            List<Genre> bookGenres = getBookGenres(genres, relations, book.getId());
-            book.setGenres(bookGenres);
+    private void mergeBooksInfo(List<Book> books, List<Genre> genres, List<BookGenreRelation> relations) {
+        Map<Long, Book> bookMap = books.stream()
+                .collect(Collectors.toMap(Book::getId, book -> book));
+        Map<Long, Genre> genreMap = genres.stream()
+                .collect(Collectors.toMap(Genre::getId, genre -> genre));
+        for (BookGenreRelation bookGenreRelation : relations) {
+            Book book = bookMap.get(bookGenreRelation.bookId());
+            List<Genre> genreList = new ArrayList<>();
+            if (book.getGenres() != null) {
+                genreList = book.getGenres();
+            }
+            genreList.add(genreMap.get(bookGenreRelation.genreId()));
+            book.setGenres(genreList);
         }
-    }
-
-    private List<Genre> getBookGenres(List<Genre> genres, List<BookGenreRelation> relations, long bookId) {
-        List<Long> genreIds = relations.stream()
-                .filter(relation -> relation.bookId() == bookId)
-                .map(BookGenreRelation::genreId)
-                .toList();
-
-        return genres.stream()
-                .filter(genre -> genreIds.contains(genre.getId()))
-                .collect(Collectors.toList());
     }
 
     private Book insert(Book book) {
