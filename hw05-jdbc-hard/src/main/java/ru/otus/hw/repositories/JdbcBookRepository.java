@@ -2,7 +2,6 @@ package ru.otus.hw.repositories;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,7 +16,6 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -138,43 +136,18 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private void batchInsertGenresRelationsFor(Book book) {
-        String insertBooksGenres = "insert into books_genres (book_id, genre_id) values  (?, ?)";
-        List<Genre> genreList = book.getGenres();
+        String insertBooksGenres = "insert into books_genres (book_id, genre_id) values  (:bookId, :genreId)";
 
-        jdbc.batchUpdate(insertBooksGenres, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
-                preparedStatement.setLong(1, book.getId());
-                preparedStatement.setLong(2, genreList.get(i).getId());
-            }
+        SqlParameterSource[] params = book.getGenres().stream().map(genre -> {
+            MapSqlParameterSource param = new MapSqlParameterSource();
+            param.addValue("bookId", book.getId());
+            param.addValue("genreId", genre.getId());
+            return param;
+        }).toArray(SqlParameterSource[]::new);
 
-            @Override
-            public int getBatchSize() {
-                return genreList.size();
-            }
-        });
+        namedParameterJdbcOperations.batchUpdate(insertBooksGenres, params);
     }
 
-    private void insertGenres(Book book, long bookId) {
-        List<Genre> genreList = new ArrayList<>(book.getGenres());
-        List<Genre> copiedgenreList = new ArrayList<>(genreList);
-        genreList.removeIf(genreRepository.findAll()::contains);
-        if (genreList.isEmpty()) {
-            insetBooksGenres(bookId, copiedgenreList);
-        } else {
-            throw new EntityNotFoundException("genre doesn't exist");
-        }
-    }
-
-    private void insetBooksGenres(long bookId, List<Genre> genreList) {
-        String insertSql = "insert into books_genres (book_id, genre_id) values (:bookId, :genreId)";
-        for (long idGanre : genreList.stream().map(Genre::getId).toList()) {
-            MapSqlParameterSource parameters = new MapSqlParameterSource();
-            parameters.addValue("bookId", bookId);
-            parameters.addValue("genreId", idGanre);
-            namedParameterJdbcOperations.update(insertSql, parameters);
-        }
-    }
 
     private long insertBookAndGetId(Book book) {
 
