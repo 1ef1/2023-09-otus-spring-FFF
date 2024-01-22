@@ -12,14 +12,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.FETCH;
-
-
 @Repository
 public class JpaBookRepository implements BookRepository {
 
     @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
+
+    public JpaBookRepository(EntityManager em) {
+        this.em = em;
+    }
 
     @Override
     public Optional<Book> findById(long id) {
@@ -37,9 +38,8 @@ public class JpaBookRepository implements BookRepository {
 
     @Override
     public List<Book> findAll() {
-        EntityGraph<?> entityGraph = em.getEntityGraph("book-genres-entity-graph");
-        TypedQuery<Book> query = em.createQuery("SELECT b FROM Book b", Book.class);
-        query.setHint(FETCH.getKey(), entityGraph);
+        TypedQuery<Book> query = em.createQuery("SELECT b FROM Book b JOIN FETCH b.genres " +
+                "JOIN FETCH b.author", Book.class);
         return query.getResultList();
     }
 

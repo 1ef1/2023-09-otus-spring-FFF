@@ -13,7 +13,11 @@ import java.util.Optional;
 public class JpaCommentRepository implements CommentRepository {
 
     @PersistenceContext
-    private EntityManager em;
+    private final  EntityManager em;
+
+    public JpaCommentRepository(EntityManager em) {
+        this.em = em;
+    }
 
 
     @Override

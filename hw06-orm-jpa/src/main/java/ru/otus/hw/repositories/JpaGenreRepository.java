@@ -15,7 +15,11 @@ public class JpaGenreRepository implements GenreRepository {
 
 
     @PersistenceContext
-    private EntityManager entityManager;
+    private final  EntityManager entityManager;
+
+    public JpaGenreRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Override
     public List<Genre> findAll() {
