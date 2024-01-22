@@ -31,16 +31,14 @@ public class CommentCommands {
         return new ArrayList<>(commentService.findAllByBookId(bookId));
     }
 
-    @ShellMethod(value = "Insert comment", key = "cins")
-    public String insertBook(long id, long bookId, String commentText) {
-        var savedBook = commentService.insert(id, bookId, commentText);
-        return CommentConverter.commentToString(savedBook);
+    @ShellMethod(value = "Insert comments ", key = "cins")
+    Comment insert(String commentText, long bookid) {
+        return commentService.insert(commentText, bookid);
     }
 
-    @ShellMethod(value = "Update comment", key = "cupd")
-    public String updateBook(long id, long bookId, String commentText) {
-        var savedBook = commentService.update(id, bookId, commentText);
-        return CommentConverter.commentToString(savedBook);
+    @ShellMethod(value = "Update comments ", key = "cupd")
+    Comment update(long id, String commentText, long bookid) {
+        return commentService.update(id, commentText, bookid);
     }
 
     @ShellMethod(value = "Delete comment by id", key = "cdel")
