@@ -1,9 +1,9 @@
 package ru.otus.hw.services;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.BookDTO;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
@@ -33,7 +33,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findById(id);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<BookDTO> findAll() {
         return bookRepository.findAll()
                 .stream()
