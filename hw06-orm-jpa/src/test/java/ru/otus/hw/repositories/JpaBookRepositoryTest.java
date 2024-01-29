@@ -82,7 +82,7 @@ class JpaBookRepositoryTest {
 
         List<Book> actualBooks = repository.findAll();
 
-        assertEquals(2, actualBooks.size());
+        assertEquals(5, actualBooks.size());
     }
 
     @Test
