@@ -15,7 +15,9 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -25,6 +27,8 @@ import java.util.List;
 @Entity
 @Table(name = "books")
 @Data
+@ToString(exclude = {"author", "genres"})
+@EqualsAndHashCode(exclude = {"author", "genres"})
 @AllArgsConstructor
 @NoArgsConstructor
 @NamedEntityGraph(name = "book-genres-entity-graph",

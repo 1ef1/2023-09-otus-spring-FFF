@@ -11,12 +11,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 
 @Entity
 @Table(name = "comments")
 @Data
+@ToString(exclude = "book")
+@EqualsAndHashCode(exclude = "book")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Comment {
