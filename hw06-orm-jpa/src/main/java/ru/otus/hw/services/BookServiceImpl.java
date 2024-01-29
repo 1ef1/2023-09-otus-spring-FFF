@@ -2,9 +2,12 @@ package ru.otus.hw.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import ru.otus.hw.dto.BookDTO;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
@@ -12,6 +15,7 @@ import ru.otus.hw.repositories.GenreRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -29,9 +33,16 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findById(id);
     }
 
-    @Override
-    public List<Book> findAll() {
-        return bookRepository.findAll();
+    @Transactional
+    public List<BookDTO> findAll() {
+        return bookRepository.findAll()
+                .stream()
+                .map(book -> {
+                    Hibernate.initialize(book.getAuthor());
+                    Hibernate.initialize(book.getGenres());
+                    return toDto(book);
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -66,5 +77,14 @@ public class BookServiceImpl implements BookService {
 
         var book = new Book(id, title, author, genres);
         return bookRepository.save(book);
+    }
+
+    private BookDTO toDto(Book book) {
+        String authorName = book.getAuthor().getFullName();
+        List<String> genreNames = book.getGenres().stream()
+                .map(Genre::getName)
+                .collect(Collectors.toList());
+
+        return new BookDTO(book.getId(), book.getTitle(), authorName, genreNames);
     }
 }
