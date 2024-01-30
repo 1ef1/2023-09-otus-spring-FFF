@@ -7,7 +7,7 @@ spring:
   sql:
     init:
       mode: always
-      data-locations: dataFake.sql
+      data-locations: dataTest.sql
   jpa:
     show-sql: true
     hibernate:
