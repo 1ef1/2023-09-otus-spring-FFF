@@ -19,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Репозиторий JPA для работы с книгами")
 @DataJpaTest
-@Import({BookRepository.class})
-class JpaBookRepositoryTest {
+class BookSpringDataRepositoryTest {
 
     @Autowired
     private BookRepository repository;
