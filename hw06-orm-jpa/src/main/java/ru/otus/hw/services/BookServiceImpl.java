@@ -1,7 +1,6 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.BookDTO;
@@ -38,8 +37,6 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAll()
                 .stream()
                 .map(book -> {
-                    Hibernate.initialize(book.getAuthor());
-                    Hibernate.initialize(book.getGenres());
                     return toDto(book);
                 })
                 .collect(Collectors.toList());
