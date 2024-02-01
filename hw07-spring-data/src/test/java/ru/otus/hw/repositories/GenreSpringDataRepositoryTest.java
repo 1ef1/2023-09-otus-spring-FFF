@@ -18,7 +18,7 @@ class GenreSpringDataRepositoryTest {
 
     @Test
     void shouldGenreFindAllByIds() {
-        int actualSize = repository.findAllByIds(Set.of(1L,2L,3L)).size();
+        int actualSize = repository.findByIdIn(Set.of(1L,2L,3L)).size();
         assertThat(actualSize).isEqualTo(3);
     }
 }

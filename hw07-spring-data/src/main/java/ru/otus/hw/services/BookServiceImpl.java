@@ -1,7 +1,6 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.BookDTO;
@@ -37,11 +36,7 @@ public class BookServiceImpl implements BookService {
     public List<BookDTO> findAll() {
         return bookRepository.findAll()
                 .stream()
-                .map(book -> {
-                    Hibernate.initialize(book.getAuthor());
-                    Hibernate.initialize(book.getGenres());
-                    return toDto(book);
-                })
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -70,7 +65,7 @@ public class BookServiceImpl implements BookService {
 
         var author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(authorId)));
-        var genres = genreRepository.findAllByIds(genresIds);
+        var genres = genreRepository.findByIdIn(genresIds);
         if (isEmpty(genres) || genresIds.size() != genres.size()) {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
