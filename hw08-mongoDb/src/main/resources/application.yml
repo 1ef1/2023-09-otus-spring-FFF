@@ -1,14 +1,12 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:maindb
-#    url : jdbc:postgresql://localhost:5432/demo
-#    username : postgres
-#    password : 123
-  sql:
-    init:
-      mode: always
-      schema-locations: schema.sql
-      data-locations: data.sql
+  data:
+    mongodb:
+      authentication-database: admin
+      username: root
+      password: root
+      database: user_db
+      port: 27017
+      host: localhost
   jpa:
     show-sql: true
     hibernate:
