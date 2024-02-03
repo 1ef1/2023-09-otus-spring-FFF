@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+#    url : jdbc:postgresql://localhost:5432/demo
+#    username : postgres
+#    password : 123
+  sql:
+    init:
+      mode: always
+      data-locations: dataFake.sql
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
