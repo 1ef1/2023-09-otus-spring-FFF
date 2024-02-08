@@ -1,5 +1,6 @@
 package ru.otus.hw.services;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.models.Comment;
 
 import java.util.List;
@@ -7,13 +8,19 @@ import java.util.Optional;
 
 
 public interface CommentService {
-    Optional<Comment> findById(long id);
 
-    List<Comment> findAllByBookId(long bookId);
 
-    Comment insert(String commentText, long bookid);
+    Optional<Comment> findById(String id);
 
-    Comment update(long id, String commentText, long bookid);
+    List<Comment> findByBookId(String bookId);
 
-    void deleteById(long id);
+
+
+    @Transactional
+    Comment insert(String commentText, String bookid);
+
+    @Transactional
+    Comment update(String id, String commentText, String bookid);
+
+    void deleteById(String id);
 }

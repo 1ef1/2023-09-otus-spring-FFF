@@ -28,11 +28,11 @@ class BookSpringDataRepositoryTest {
 
     @Test
     void savedBookShouldPersist() {
-        Author author = new Author(0, "Author1");
+        Author author = new Author("0", "Author1");
         entityManager.persistAndFlush(author);
 
-        Genre genre = new Genre(0, "Genre1");
-        Book expectedBook = new Book(0, "Title1", author, Collections.singletonList(genre));
+        Genre genre = new Genre("0", "Genre1");
+        Book expectedBook = new Book("0", "Title1", author, Collections.singletonList(genre));
 
         repository.save(expectedBook);
 
@@ -42,13 +42,13 @@ class BookSpringDataRepositoryTest {
 
     @Test
     void shouldFindBookById() {
-        final Author author = new Author(0L, "testAuthor");
+        final Author author = new Author("0", "testAuthor");
         entityManager.persist(author);
 
-        final Genre genre = new Genre(0L, "testGenre");
+        final Genre genre = new Genre("0", "testGenre");
         entityManager.persist(genre);
 
-        final Book expectedBook = new Book(0L, "testBook", author, Collections.singletonList(genre));
+        final Book expectedBook = new Book("0", "testBook", author, Collections.singletonList(genre));
         Book savedBook = entityManager.persist(expectedBook);
         entityManager.flush();
 
@@ -60,19 +60,19 @@ class BookSpringDataRepositoryTest {
 
     @Test
     void shouldFindAllBooks() {
-        Author testAuthor1 = new Author(0, "testAuthor1");
-        Author testAuthor2 = new Author(0, "testAuthor2");
+        Author testAuthor1 = new Author("0", "testAuthor1");
+        Author testAuthor2 = new Author("0", "testAuthor2");
         entityManager.persistAndFlush(testAuthor1);
         entityManager.persistAndFlush(testAuthor2);
 
-        final Genre testGenre1 = new Genre(0L, "testGenre1");
+        final Genre testGenre1 = new Genre("0", "testGenre1");
         entityManager.persist(testGenre1);
-        final Genre testGenre2 = new Genre(0L, "testGenre2");
+        final Genre testGenre2 = new Genre("0", "testGenre2");
         entityManager.persist(testGenre2);
 
-        final Book firstExpectedBook = new Book(0L, "testBook1", testAuthor1,
+        final Book firstExpectedBook = new Book("0", "testBook1", testAuthor1,
                 Collections.singletonList(testGenre1));
-        final Book secondExpectedBook = new Book(0L, "testBook2", testAuthor2,
+        final Book secondExpectedBook = new Book("0", "testBook2", testAuthor2,
                 Collections.singletonList(testGenre2));
 
         entityManager.persist(firstExpectedBook);
@@ -85,10 +85,10 @@ class BookSpringDataRepositoryTest {
 
     @Test
     void shouldDeleteBookById() {
-        final Genre genre = new Genre(0L, "testGenre");
-        Author testAuthor = new Author(0, "testAuthor");
+        final Genre genre = new Genre("0", "testGenre");
+        Author testAuthor = new Author("0", "testAuthor");
         entityManager.persistAndFlush(testAuthor);
-        final Book firstBook = new Book(0L, "testBook", testAuthor,
+        final Book firstBook = new Book("0", "testBook", testAuthor,
                 Collections.singletonList(genre));
         Book savedBook = entityManager.persist(firstBook);
         repository.deleteById(savedBook.getId());
