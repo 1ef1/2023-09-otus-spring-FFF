@@ -1,12 +1,10 @@
 spring:
   data:
     mongodb:
-      authentication-database: admin
-      username: root
-      password: root
-      database: user_db
-      port: 27017
+      port: 27017 # when flapdoodle using
+      database: company
       host: localhost
+
   jpa:
     show-sql: true
     hibernate:
