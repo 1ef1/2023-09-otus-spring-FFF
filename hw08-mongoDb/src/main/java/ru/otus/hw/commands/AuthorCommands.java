@@ -22,4 +22,10 @@ public class AuthorCommands {
                 .map(authorConverter::authorToString)
                 .collect(Collectors.joining("," + System.lineSeparator()));
     }
+
+    @ShellMethod(value = "Authors insert", key = "ai")
+    public String insertAuthork(String fullName) {
+            var savedBook = authorService.insert(fullName);
+            return authorConverter.authorToString(savedBook);
+    }
 }

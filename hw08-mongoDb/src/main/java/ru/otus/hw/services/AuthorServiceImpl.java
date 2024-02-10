@@ -7,6 +7,7 @@ import ru.otus.hw.repositories.AuthorRepository;
 
 import java.util.List;
 
+
 @RequiredArgsConstructor
 @Service
 public class AuthorServiceImpl implements AuthorService {
@@ -16,4 +17,18 @@ public class AuthorServiceImpl implements AuthorService {
     public List<Author> findAll() {
         return authorRepository.findAll();
     }
+
+    @Override
+    public Author insert(String fullName) {
+        var author1 = new Author("0", fullName);
+        return authorRepository.save(author1);
+    }
+
+    private Author save(String id, String fullName) {
+
+
+        var author = new Author(id, fullName);
+        return authorRepository.save(author);
+    }
+
 }
