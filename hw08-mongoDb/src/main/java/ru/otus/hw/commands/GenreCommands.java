@@ -22,4 +22,10 @@ public class GenreCommands {
                 .map(genreConverter::genreToString)
                 .collect(Collectors.joining("," + System.lineSeparator()));
     }
+
+    @ShellMethod(value = "Genre insert", key = "gi")
+    public String insertGenre(String name) {
+        var savedBook = genreService.insert(name);
+        return genreConverter.genreToString(savedBook);
+    }
 }

@@ -16,4 +16,17 @@ public class GenreServiceImpl implements GenreService {
     public List<Genre> findAll() {
         return genreRepository.findAll();
     }
+
+
+
+    @Override
+    public Genre insert(String name) {
+        var genre = new Genre(null, name);
+        return genreRepository.save(genre);
+    }
+
+    private Genre save(String id, String name) {
+        var genre = new Genre(id, name);
+        return genreRepository.save(genre);
+    }
 }
