@@ -20,7 +20,7 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public Author insert(String fullName) {
-        var author1 = new Author("0", fullName);
+        var author1 = new Author(null, fullName);
         return authorRepository.save(author1);
     }
 
