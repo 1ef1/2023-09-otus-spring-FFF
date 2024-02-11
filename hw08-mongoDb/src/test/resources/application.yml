@@ -1,6 +1,21 @@
 spring:
   data:
     mongodb:
-      port: 27017 # when flapdoodle using
-      database: company
+      port: 0
+      database: test
       host: localhost
+
+  shell:
+    interactive:
+      enabled: true
+    noninteractive:
+      enabled: false
+
+    command:
+      version:
+        enabled: false
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 4.0.2

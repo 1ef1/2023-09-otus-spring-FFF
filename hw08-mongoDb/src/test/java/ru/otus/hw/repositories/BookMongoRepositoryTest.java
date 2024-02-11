@@ -28,11 +28,11 @@ class BookMongoRepositoryTest {
 
     @Test
     void savedBookShouldPersist() {
-        Author author = new Author("0", "Author1");
+        Author author = new Author(null, "Author1");
         mongoTemplate.save(author);
 
-        Genre genre = new Genre("0", "Genre1");
-        Book expectedBook = new Book("0", "Title1", author, Collections.singletonList(genre));
+        Genre genre = new Genre(null, "Genre1");
+        Book expectedBook = new Book(null, "Title1", author, Collections.singletonList(genre));
 
         repository.save(expectedBook);
 
@@ -42,13 +42,13 @@ class BookMongoRepositoryTest {
 
     @Test
     void shouldFindBookById() {
-        final Author author = new Author("0", "testAuthor");
+        final Author author = new Author(null, "testAuthor");
         mongoTemplate.save(author);
 
-        final Genre genre = new Genre("0", "testGenre");
+        final Genre genre = new Genre(null, "testGenre");
         mongoTemplate.save(genre);
 
-        final Book expectedBook = new Book("0", "testBook", author, Collections.singletonList(genre));
+        final Book expectedBook = new Book(null, "testBook", author, Collections.singletonList(genre));
         mongoTemplate.save(expectedBook);
 
         Optional<Book> actualBookOptional = repository.findById(expectedBook.getId());
@@ -59,17 +59,17 @@ class BookMongoRepositoryTest {
 
     @Test
     void shouldFindAllBooks() {
-        Author testAuthor1 = new Author("0", "testAuthor1");
-        Author testAuthor2 = new Author("0", "testAuthor2");
+        Author testAuthor1 = new Author(null, "testAuthor1");
+        Author testAuthor2 = new Author(null, "testAuthor2");
         mongoTemplate.save(testAuthor1);
         mongoTemplate.save(testAuthor2);
 
-        final Genre testGenre1 = new Genre("0", "testGenre1");
-        final Genre testGenre2 = new Genre("0", "testGenre2");
+        final Genre testGenre1 = new Genre(null, "testGenre1");
+        final Genre testGenre2 = new Genre(null, "testGenre2");
 
-        final Book firstExpectedBook = new Book("0", "testBook1", testAuthor1,
+        final Book firstExpectedBook = new Book(null, "testBook1", testAuthor1,
                 Collections.singletonList(testGenre1));
-        final Book secondExpectedBook = new Book("0", "testBook2", testAuthor2,
+        final Book secondExpectedBook = new Book(null, "testBook2", testAuthor2,
                 Collections.singletonList(testGenre2));
 
         mongoTemplate.save(firstExpectedBook);
@@ -77,15 +77,15 @@ class BookMongoRepositoryTest {
 
         List<Book> actualBooks = repository.findAll();
 
-        assertThat(actualBooks.size()).isEqualTo(5);
+        assertThat(actualBooks.size()).isEqualTo(3);
     }
 
     @Test
     void shouldDeleteBookById() {
-        final Genre genre = new Genre("0", "testGenre");
-        Author testAuthor = new Author("0", "testAuthor");
+        final Genre genre = new Genre(null, "testGenre");
+        Author testAuthor = new Author(null, "testAuthor");
         mongoTemplate.save(testAuthor);
-        final Book firstBook = new Book("0", "testBook", testAuthor,
+        final Book firstBook = new Book(null, "testBook", testAuthor,
                 Collections.singletonList(genre));
         Book savedBook = mongoTemplate.save(firstBook);
         repository.deleteById(savedBook.getId());
