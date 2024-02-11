@@ -4,8 +4,3 @@ spring:
       port: 27017 # when flapdoodle using
       database: company
       host: localhost
-
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: none
