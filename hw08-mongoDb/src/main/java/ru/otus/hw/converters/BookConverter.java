@@ -19,7 +19,7 @@ public class BookConverter {
                 .map(genreConverter::genreToString)
                 .map("{%s}"::formatted)
                 .collect(Collectors.joining(", "));
-        return "Id: %d, title: %s, author: {%s}, genres: [%s]".formatted(
+        return "Id: %s, title: %s, author: {%s}, genres: [%s]".formatted(
                 book.getId(),
                 book.getTitle(),
                 authorConverter.authorToString(book.getAuthor()),
@@ -28,7 +28,7 @@ public class BookConverter {
 
     public String bookDtoToString(BookDTO bookDto) {
         String genresString = String.join(", ", bookDto.getGenreNames());
-        return "Id: %d, title: %s, author: {%s}, genres: [%s]".formatted(
+        return "Id: %s, title: %s, author: {%s}, genres: [%s]".formatted(
                 bookDto.getId(),
                 bookDto.getTitle(),
                 bookDto.getAuthorName(),
