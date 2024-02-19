@@ -38,6 +38,8 @@ class BookMongoRepositoryTest {
 
         Book actualBook = mongoTemplate.findById(expectedBook.getId(), Book.class);
         assertThat(actualBook).isEqualTo(expectedBook);
+        assert actualBook != null;
+        mongoTemplate.remove(actualBook);
     }
 
     @Test
@@ -55,6 +57,8 @@ class BookMongoRepositoryTest {
 
         assertTrue(actualBookOptional.isPresent());
         assertThat(actualBookOptional.get()).isEqualTo(expectedBook);
+        actualBookOptional.ifPresent(book -> mongoTemplate.remove(book));
+
     }
 
     @Test
@@ -77,7 +81,7 @@ class BookMongoRepositoryTest {
 
         List<Book> actualBooks = repository.findAll();
 
-        assertThat(actualBooks.size()).isEqualTo(3);
+        assertThat(actualBooks.size()).isEqualTo(2);
     }
 
     @Test

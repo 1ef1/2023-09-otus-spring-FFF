@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.dto.BookDTO;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.CommentRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
@@ -25,10 +27,16 @@ public class BookServiceImpl implements BookService {
 
     private final GenreRepository genreRepository;
 
+    private final CommentRepository commentRepository;
+
     private final BookRepository bookRepository;
 
     @Override
     public Optional<Book> findById(String id) {
+
+        for (Comment comment:commentRepository.findByBookId(id)) {
+            commentRepository.delete(comment);
+        }
         return bookRepository.findById(id);
     }
 
