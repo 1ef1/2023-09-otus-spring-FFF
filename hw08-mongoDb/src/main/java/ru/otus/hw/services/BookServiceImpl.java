@@ -33,10 +33,6 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Optional<Book> findById(String id) {
-
-        for (Comment comment:commentRepository.findByBookId(id)) {
-            commentRepository.delete(comment);
-        }
         return bookRepository.findById(id);
     }
 
@@ -63,6 +59,9 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public void deleteById(String id) {
+        for (Comment comment:commentRepository.findByBookId(id)) {
+            commentRepository.delete(comment);
+        }
         bookRepository.deleteById(id);
     }
 
