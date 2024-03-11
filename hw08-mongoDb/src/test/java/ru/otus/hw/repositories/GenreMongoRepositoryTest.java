@@ -26,13 +26,10 @@ class GenreMongoRepositoryTest {
     void shouldGenreFindAllByIds() {
         Genre genre1 = new Genre(null, "Genre1");
         mongoTemplate.save(genre1);
-        Genre genre2 = new Genre(null, "Genre2");
-        mongoTemplate.save(genre2);
-        Genre genre3 = new Genre(null, "Genre3");
-        mongoTemplate.save(genre3);
 
 
-        int actualSize = repository.findByIdIn(Set.of(genre1.getId(),genre2.getId(),genre3.getId())).size();
-        assertThat(actualSize).isEqualTo(3);
+
+        Genre genrePers = repository.findById(genre1.getId()).get();
+        assertThat(genre1).isEqualTo(genrePers);
     }
 }

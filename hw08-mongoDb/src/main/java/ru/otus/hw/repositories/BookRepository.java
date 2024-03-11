@@ -10,6 +10,8 @@ public interface BookRepository extends MongoRepository<Book, String> {
     @Override
     List<Book> findAll();
 
+    List<Book> findByAuthorId(String id);
+
     @Override
     void deleteById(String id);
 

@@ -29,7 +29,7 @@ class CommentMongoRepositoryTest {
 //        mongoTemplate.save(author);
 
         Genre genre = new Genre(null, "Genre1");
-        Book expectedBook = new Book(null, "Title1", author, Collections.singletonList(genre));
+        Book expectedBook = new Book(null, "Title1", author, genre);
         mongoTemplate.save(expectedBook);
         Comment comment = new Comment(null,expectedBook,"testComment");
         mongoTemplate.save(comment);

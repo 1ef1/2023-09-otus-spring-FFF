@@ -8,4 +8,6 @@ public interface AuthorService {
     List<Author> findAll();
 
     Author insert(String fullName);
+
+    Author update(String id,String fullName);
 }

@@ -6,7 +6,6 @@ import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.BookConverter;
 import ru.otus.hw.services.BookService;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
@@ -33,14 +32,14 @@ public class BookCommands {
     }
 
     @ShellMethod(value = "Insert book", key = "bins")
-    public String insertBook(String title, String authorId, Set<String> genresIds) {
-        var savedBook = bookService.insert(title, authorId, genresIds);
+    public String insertBook(String title, String authorId, String genresId) {
+        var savedBook = bookService.insert(title, authorId, genresId);
         return bookConverter.bookToString(savedBook);
     }
 
     @ShellMethod(value = "Update book", key = "bupd")
-    public String updateBook(String id, String title, String authorId, Set<String> genresIds) {
-        var savedBook = bookService.update(id, title, authorId, genresIds);
+    public String updateBook(String id, String title, String authorId, String genresId) {
+        var savedBook = bookService.update(id, title, authorId, genresId);
         return bookConverter.bookToString(savedBook);
     }
 
