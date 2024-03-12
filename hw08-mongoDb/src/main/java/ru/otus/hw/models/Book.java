@@ -12,8 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "books")
 @Data
-@ToString(exclude = {"author", "genres"})
-@EqualsAndHashCode(exclude = {"author", "genres"})
+@ToString(exclude = {"author", "genre"})
+@EqualsAndHashCode(exclude = {"author", "genre"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class Book {

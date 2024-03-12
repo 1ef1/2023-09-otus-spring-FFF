@@ -8,4 +8,6 @@ public interface GenreService {
     List<Genre> findAll();
 
     Genre insert(String name);
+
+    Genre update(String id, String name);
 }

@@ -28,4 +28,10 @@ public class GenreCommands {
         var savedBook = genreService.insert(name);
         return genreConverter.genreToString(savedBook);
     }
+
+    @ShellMethod(value = "Genre update", key = "gu")
+    public String updateGenre(String id, String name) {
+        var savedGenre = genreService.update(id, name);
+        return genreConverter.genreToString(savedGenre);
+    }
 }

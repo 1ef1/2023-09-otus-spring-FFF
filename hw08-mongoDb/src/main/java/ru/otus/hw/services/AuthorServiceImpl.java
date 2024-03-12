@@ -6,8 +6,6 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
-import ru.otus.hw.repositories.GenreRepository;
-
 import java.util.List;
 
 
@@ -17,9 +15,6 @@ public class AuthorServiceImpl implements AuthorService {
     private final AuthorRepository authorRepository;
 
     private final BookRepository bookRepository;
-
-
-    private final GenreRepository genreRepository;
 
     @Override
     public List<Author> findAll() {
@@ -41,10 +36,4 @@ public class AuthorServiceImpl implements AuthorService {
         }
         return authorRepository.save(author1);
     }
-
-    private Author save(String id, String fullName) {
-        var author = new Author(id, fullName);
-        return authorRepository.save(author);
-    }
-
 }
