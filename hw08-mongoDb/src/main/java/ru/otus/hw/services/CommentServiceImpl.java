@@ -29,6 +29,11 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    public void deleteByBookId(String bookId) {
+
+    }
+
+    @Override
     @Transactional
     public Comment insert(String commentText, String bookid) {
         return save("0", commentText, bookid);
@@ -56,5 +61,4 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment(id, book, commentText);
         return commentRepository.save(comment);
     }
-
 }

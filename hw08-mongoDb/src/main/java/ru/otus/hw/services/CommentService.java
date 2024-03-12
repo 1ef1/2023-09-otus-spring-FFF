@@ -14,7 +14,7 @@ public interface CommentService {
 
     List<Comment> findByBookId(String bookId);
 
-
+    void deleteByBookId(String bookId);
 
     @Transactional
     Comment insert(String commentText, String bookid);
