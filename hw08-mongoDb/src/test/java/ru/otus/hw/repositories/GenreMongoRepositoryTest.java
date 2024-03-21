@@ -27,8 +27,6 @@ class GenreMongoRepositoryTest {
         Genre genre1 = new Genre(null, "Genre1");
         mongoTemplate.save(genre1);
 
-
-
         Genre genrePers = repository.findById(genre1.getId()).get();
         assertThat(genre1).isEqualTo(genrePers);
     }

@@ -5,12 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import ru.otus.hw.dto.BookDTO;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,24 +31,14 @@ class BookMongoRepositoryTest {
         mongoTemplate.save(author);
 
         Genre genre = new Genre(null, "Genre1");
-        Book expectedBook = new Book(null, "Title1", author, genre);
+        Book expectedBook = new Book(null, "Title11", author, genre);
 
         repository.save(expectedBook);
 
         Book actualBook = mongoTemplate.findById(expectedBook.getId(), Book.class);
         assertThat(actualBook).isEqualTo(expectedBook);
         assert actualBook != null;
-
-
-
-//        List<Book> expectedBook2 = repository.findByAuthorId(actualBook.getAuthor().getId());
-//        Book book2 = expectedBook2.get(0);
-//        book2.setTitle(book2.getTitle());
-//        book2.setAuthor(book2.getAuthorName().);
-//        book2.setGenre(expectedBook2.getGenre());
-//        assertThat(actualBook).isEqualTo( book2);
-//
-//        mongoTemplate.remove(actualBook);
+        repository.deleteById(expectedBook.getId());
     }
 
     @Test
@@ -69,6 +57,7 @@ class BookMongoRepositoryTest {
         assertTrue(actualBookOptional.isPresent());
         assertThat(actualBookOptional.get()).isEqualTo(expectedBook);
         actualBookOptional.ifPresent(book -> mongoTemplate.remove(book));
+        repository.deleteById(expectedBook.getId());
 
     }
 
@@ -92,7 +81,9 @@ class BookMongoRepositoryTest {
 
         List<Book> actualBooks = repository.findAll();
 
-        assertThat(actualBooks.size()).isEqualTo(3);
+        assertThat(actualBooks.size()).isEqualTo(2);
+        repository.deleteById(firstExpectedBook.getId());
+        repository.deleteById(secondExpectedBook.getId());
     }
 
     @Test
@@ -106,5 +97,7 @@ class BookMongoRepositoryTest {
         repository.deleteById(savedBook.getId());
         Book deletedBook = mongoTemplate.findById(savedBook.getId(), Book.class);
         assertNull(deletedBook);
+        repository.deleteById(firstBook.getId());
     }
+
 }

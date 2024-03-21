@@ -26,7 +26,6 @@ class CommentMongoRepositoryTest {
     @Test
     void shouldCommentFindAllByBookId() {
         Author author = new Author(null, "Author1");
-//        mongoTemplate.save(author);
 
         Genre genre = new Genre(null, "Genre1");
         Book expectedBook = new Book(null, "Title1", author, genre);
@@ -35,5 +34,7 @@ class CommentMongoRepositoryTest {
         mongoTemplate.save(comment);
         int actualSize = repository.findAll().size();
         assertThat(actualSize).isEqualTo(1);
+        mongoTemplate.remove(expectedBook);
+        actualSize = repository.findAll().size();
     }
 }
