@@ -11,7 +11,7 @@ public interface BookService {
 
     List<BookDTO> findAll();
 
-    List<Book> findByAuthorId(String id);
+
 
     Book insert(String title, String authorId, String genresIds);
 

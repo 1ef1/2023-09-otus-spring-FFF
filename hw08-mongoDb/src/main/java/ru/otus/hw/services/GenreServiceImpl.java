@@ -1,10 +1,13 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
-import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
 import java.util.List;
@@ -14,7 +17,7 @@ import java.util.List;
 public class GenreServiceImpl implements GenreService {
     private final GenreRepository genreRepository;
 
-    private final BookRepository bookRepository;
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public List<Genre> findAll() {
@@ -27,13 +30,25 @@ public class GenreServiceImpl implements GenreService {
         return genreRepository.save(genre);
     }
 
+    @Override
     public Genre update(String id, String name) {
-        var genreUpdated = new Genre(id, name);
-        List<Book> bookDTOList = bookRepository.findByGenreId(id);
-        for (Book book : bookDTOList) {
-            Book newBook = new Book(book.getId(), book.getTitle(), book.getAuthor(),genreUpdated);
-            bookRepository.save(newBook);
-        }
-        return genreRepository.save(genreUpdated);
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(id));
+
+        Update update = new Update();
+        update.set("name", name);
+
+        // Обновляем жанр
+        mongoTemplate.updateFirst(query, update, Genre.class);
+
+        // Обновляем жанры в книгах, которые содержат этот жанр
+        Update updateBooks = new Update();
+        updateBooks.set("genre.name", name);
+        mongoTemplate.updateMulti(new Query(Criteria.where("genre.id").is(id)), updateBooks, Book.class);
+
+        // Получаем обновленный жанр
+        Genre updatedGenre = mongoTemplate.findOne(query, Genre.class);
+
+        return updatedGenre;
     }
 }
