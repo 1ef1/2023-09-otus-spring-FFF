@@ -1,11 +1,15 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
-import ru.otus.hw.repositories.BookRepository;
+
 import java.util.List;
 
 
@@ -14,7 +18,8 @@ import java.util.List;
 public class AuthorServiceImpl implements AuthorService {
     private final AuthorRepository authorRepository;
 
-    private final BookRepository bookRepository;
+    private final MongoTemplate mongoTemplate;
+
 
     @Override
     public List<Author> findAll() {
@@ -29,11 +34,18 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public Author update(String id, String fullName) {
-        var author1 = new Author(id, fullName);
-        List<Book> bookDTOList = bookRepository.findByAuthorId(id);
-        for (Book book : bookDTOList) {
-            bookRepository.save(new Book(book.getId(), book.getTitle(), author1,book.getGenre()));
-        }
-        return authorRepository.save(author1);
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(id));
+
+        Update update = new Update();
+        update.set("fullName", fullName);
+
+        mongoTemplate.updateFirst(query, update, Author.class);
+
+        Update updateAuthor = new Update();
+        updateAuthor.set("author.fullName", fullName);
+        mongoTemplate.updateMulti(new Query(Criteria.where("author.id").is(id)), updateAuthor, Book.class);
+
+        return mongoTemplate.findOne(query, Author.class);
     }
 }

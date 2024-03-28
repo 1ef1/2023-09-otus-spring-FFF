@@ -38,17 +38,12 @@ public class GenreServiceImpl implements GenreService {
         Update update = new Update();
         update.set("name", name);
 
-        // Обновляем жанр
         mongoTemplate.updateFirst(query, update, Genre.class);
 
-        // Обновляем жанры в книгах, которые содержат этот жанр
         Update updateBooks = new Update();
         updateBooks.set("genre.name", name);
         mongoTemplate.updateMulti(new Query(Criteria.where("genre.id").is(id)), updateBooks, Book.class);
 
-        // Получаем обновленный жанр
-        Genre updatedGenre = mongoTemplate.findOne(query, Genre.class);
-
-        return updatedGenre;
+        return mongoTemplate.findOne(query, Genre.class);
     }
 }
