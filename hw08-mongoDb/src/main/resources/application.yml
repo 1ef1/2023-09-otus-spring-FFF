@@ -1,0 +1,11 @@
+spring:
+  data:
+    mongodb:
+      port: 27017 # when flapdoodle using
+      database: company
+      host: localhost
+
+  mongo-db:
+    write-concern:
+      journal: false
+    read-concern: local
