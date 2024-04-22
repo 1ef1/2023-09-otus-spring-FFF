@@ -28,7 +28,7 @@ public class BookController {
     public String editPage(@RequestParam("id") long id, Model model) {
         Book book = repository.findById(id).orElseThrow(null);
         model.addAttribute("book", book);
-        return "edit";
+        return "booksEdit.html";
     }
 
     @PostMapping("/edit")
