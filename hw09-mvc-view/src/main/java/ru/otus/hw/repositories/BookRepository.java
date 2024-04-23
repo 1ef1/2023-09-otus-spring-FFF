@@ -5,20 +5,9 @@ import org.springframework.data.jpa.repository.Query;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
-
     @Override
-//    @EntityGraph(attributePaths = {"genres","author"})
-    Optional<Book> findById(Long id);
-
-    @Override
-//    @EntityGraph(attributePaths = {"genres","author"})
-    @Query("SELECT b FROM Book b JOIN FETCH b.author")
+    @Query("SELECT b FROM Book b JOIN FETCH b.author JOIN FETCH b.genre")
     List<Book> findAll();
-
-    @Override
-    void deleteById(Long id);
-
 }
