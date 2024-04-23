@@ -39,6 +39,16 @@
     </div>
 
     <div class="row">
+        <label for="author-name-input">Author Name:</label>
+        <input id="author-name-input" type="text" readonly="readonly" th:value="*{author.fullName}" />
+    </div>
+
+    <div class="row">
+        <label for="genre-name-input">Genre Name:</label>
+        <input id="genre-name-input" type="text" readonly="readonly" th:value="*{genre.name}" />
+    </div>
+
+    <div class="row">
         <button type="submit">Save</button>
         <a href="booksList.html" th:href="@{/}"><button type="button">Cancel</button></a>
     </div>
