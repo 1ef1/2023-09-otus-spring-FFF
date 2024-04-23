@@ -88,6 +88,7 @@ class BookSpringDataRepositoryTest {
         final Genre genre = new Genre(0L, "testGenre");
         Author testAuthor = new Author(0, "testAuthor");
         entityManager.persistAndFlush(testAuthor);
+        entityManager.persistAndFlush(genre);
         final Book firstBook = new Book(0L, "testBook", testAuthor,
                 genre);
         Book savedBook = entityManager.persist(firstBook);

@@ -16,6 +16,6 @@ class CommentSpringDataRepositoryTest {
     @Test
     void shouldCommentFindAllByBookId() {
         int actualSize = repository.findAllByBookId(1L).size();
-        assertThat(actualSize).isEqualTo(2);
+        assertThat(actualSize).isEqualTo(3);
     }
 }

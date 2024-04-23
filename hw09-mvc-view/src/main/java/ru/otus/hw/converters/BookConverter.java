@@ -19,4 +19,12 @@ public class BookConverter {
                 authorConverter.authorToString(book.getAuthor()),
                 genreConverter.genreToString(book.getGenre()));
     }
+
+    public String bookDtoToString(BookDTO bookDto) {
+        return "Id: %d, title: %s, author: {%s}, genres: [%s]".formatted(
+                bookDto.getId(),
+                bookDto.getTitle(),
+                bookDto.getAuthorName(),
+                bookDto.getGenreName());
+    }
 }
