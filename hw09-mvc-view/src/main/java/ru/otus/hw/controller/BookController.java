@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.services.BookServiceImpl;
 
 import java.util.List;
 
@@ -16,6 +17,8 @@ import java.util.List;
 public class BookController {
 
     private final BookRepository repository;
+
+    private final BookServiceImpl bookService;
 
     @GetMapping("/")
     public String listPage(Model model) {
@@ -34,6 +37,7 @@ public class BookController {
     @PostMapping("/edit")
     public String savePerson(Book book) {
         repository.save(book);
+        bookService.update(book.getId(),book.getTitle(),0L,0L);
         return "redirect:/";
     }
 }

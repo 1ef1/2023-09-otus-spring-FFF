@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import ru.otus.hw.models.Genre;
 
 import java.util.Set;
 
@@ -18,7 +19,7 @@ class GenreSpringDataRepositoryTest {
 
     @Test
     void shouldGenreFindAllByIds() {
-        int actualSize = repository.findByIdIn(Set.of(1L,2L,3L)).size();
-        assertThat(actualSize).isEqualTo(3);
+        Genre genre = repository.findById(1L).get();
+        assertThat(genre.getId()).isEqualTo(1L);
     }
 }

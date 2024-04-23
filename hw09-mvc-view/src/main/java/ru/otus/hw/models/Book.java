@@ -7,8 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -16,17 +14,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-
-
-import java.util.List;
 
 @Entity
 @Table(name = "books")
 @Data
-@ToString(exclude = {"author", "genres"})
-@EqualsAndHashCode(exclude = {"author", "genres"})
+@ToString(exclude = {"author", "genre"})
+@EqualsAndHashCode(exclude = {"author", "genre"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class Book {
@@ -41,13 +34,8 @@ public class Book {
     @JoinColumn(name = "author_id", nullable = false)
     private Author author;
 
-    @Fetch(FetchMode.SUBSELECT)
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "books_genres",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id")
-    )
-    private List<Genre> genres;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "genre_id", nullable = false)
+    private Genre genre;
 }
 

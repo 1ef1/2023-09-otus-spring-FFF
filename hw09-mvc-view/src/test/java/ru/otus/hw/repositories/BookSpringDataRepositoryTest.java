@@ -9,7 +9,6 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +31,8 @@ class BookSpringDataRepositoryTest {
         entityManager.persistAndFlush(author);
 
         Genre genre = new Genre(0, "Genre1");
-        Book expectedBook = new Book(0, "Title1", author, Collections.singletonList(genre));
+        entityManager.persistAndFlush(genre);
+        Book expectedBook = new Book(0, "Title1", author, genre);
 
         repository.save(expectedBook);
 
@@ -48,7 +48,7 @@ class BookSpringDataRepositoryTest {
         final Genre genre = new Genre(0L, "testGenre");
         entityManager.persist(genre);
 
-        final Book expectedBook = new Book(0L, "testBook", author, Collections.singletonList(genre));
+        final Book expectedBook = new Book(0L, "testBook", author, genre);
         Book savedBook = entityManager.persist(expectedBook);
         entityManager.flush();
 
@@ -71,9 +71,9 @@ class BookSpringDataRepositoryTest {
         entityManager.persist(testGenre2);
 
         final Book firstExpectedBook = new Book(0L, "testBook1", testAuthor1,
-                Collections.singletonList(testGenre1));
+                testGenre1);
         final Book secondExpectedBook = new Book(0L, "testBook2", testAuthor2,
-                Collections.singletonList(testGenre2));
+                testGenre2);
 
         entityManager.persist(firstExpectedBook);
         entityManager.persist(secondExpectedBook);
@@ -89,7 +89,7 @@ class BookSpringDataRepositoryTest {
         Author testAuthor = new Author(0, "testAuthor");
         entityManager.persistAndFlush(testAuthor);
         final Book firstBook = new Book(0L, "testBook", testAuthor,
-                Collections.singletonList(genre));
+                genre);
         Book savedBook = entityManager.persist(firstBook);
         repository.deleteById(savedBook.getId());
         Book deletedBook = entityManager.find(Book.class, savedBook.getId());
